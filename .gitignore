@@ -1,2 +1,3 @@
 Price_Oracle_AVS_JS/.env
-Price_Oracle_AVS_JS/node_modules
+Price_Oracle_AVS_JS/node_modules/*
+Price_Oracle_AVS_JS/node_modules/
