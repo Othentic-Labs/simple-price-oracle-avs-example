@@ -1,6 +1,7 @@
 # About the Repo
 
-This repo records idea for AVS networks
+This repo holds a samples for AVS implementations.
+The AVS developer required to build a web API that implement few end-points:
 
-
-1. Cross-Chain Messaging - Aim to be the decentralized version of LayerZero
+  1. POST task/execute returns (string proofOfTask);
+  2. POST task/validate returns (bool) {"proofOfTask": "{proofOfTask}"};
