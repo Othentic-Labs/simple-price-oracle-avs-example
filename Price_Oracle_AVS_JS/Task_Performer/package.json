@@ -1,5 +1,5 @@
 {
-  "name": "avs_server",
+  "name": "task_preformer",
   "version": "1.0.0",
   "description": "",
   "module": "ESModule",
@@ -9,7 +9,7 @@
     "build": ""
   },
   "author": "",
-  "license": "ISC",
+  "license": "BUSL-1.1",
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
     "@types/axios": "^0.14.0",

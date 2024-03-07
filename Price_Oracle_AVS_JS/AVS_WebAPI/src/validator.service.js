@@ -2,8 +2,6 @@ require('dotenv').config();
 const dalService = require("./dal.service");
 const oracleService = require("./oracle.service");
 
-
-
 async function validate(proofOfTask) {
 
   try {
