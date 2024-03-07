@@ -2,8 +2,6 @@
 const { Router } = require("express")
 const CustomError = require("./utils/validateError");
 const CustomResponse = require("./utils/validateResponse");
-const oracleService = require("./oracle.service");
-const dalService = require("./dal.service");
 const validatorService = require("./validator.service");
 
 const router = Router()

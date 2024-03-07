@@ -21,7 +21,9 @@ function init() {
 async function sendTask(cid) {
 
   var wallet = new ethers.Wallet(privateKey);
-  var sig = await wallet.signMessage(cid);
+  const proofHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(['string'], [cid]));
+  const proofBytes = ethers.utils.arrayify(proofHash);
+  var sig = await wallet.signMessage(proofBytes);
 
   const jsonRpcBody = {
     jsonrpc: "2.0",
@@ -33,7 +35,7 @@ async function sendTask(cid) {
     ]
   };
     try {
-      const provider = new ethers.providers.JsonRpcProvider(rpcEndpoint);
+      const provider = new ethers.providers.JsonRpcProvider(rpcBaseAddress);
       const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
       console.log("API response:", response);
   } catch (error) {
