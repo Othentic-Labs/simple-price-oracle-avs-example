@@ -12,13 +12,6 @@ function init() {
   ipfsHost = process.env.IPFS_HOST;
 }
 
-async function publishJSONToIpfs(data) {
-    const pinata = new pinataSDK(pinataApiKey, pinataSecretApiKey);
-    const response = await pinata.pinJSONToIPFS(data);
-    const cid = response.IpfsHash;
-    console.log(`cid: ${cid}`);
-    return cid;
-  }
 
 async function getIPfsTask(cid) {
     const { data } = await axios.get(ipfsHost + cid);
@@ -27,6 +20,5 @@ async function getIPfsTask(cid) {
   
 module.exports = {
   init,
-  publishJSONToIpfs,
   getIPfsTask
 }
