@@ -1,6 +1,6 @@
 require('dotenv').config();
 const pinataSDK = require("@pinata/sdk");
-const { ethers } = require('ethers');
+const { ethers, AbiCoder } = require('ethers');
 
 var pinataApiKey='';
 var pinataSecretApiKey='';
@@ -21,8 +21,8 @@ function init() {
 async function sendTask(cid) {
 
   var wallet = new ethers.Wallet(privateKey);
-  const proofHash = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(['string'], [cid]));
-  const proofBytes = ethers.utils.arrayify(proofHash);
+  const proofHash = ethers.keccak256(AbiCoder.defaultAbiCoder().encode(['string'], [cid]));
+  const proofBytes = ethers.getBytes(proofHash);
   var sig = await wallet.signMessage(proofBytes);
 
   const jsonRpcBody = {
@@ -35,7 +35,7 @@ async function sendTask(cid) {
     ]
   };
     try {
-      const provider = new ethers.providers.JsonRpcProvider(rpcBaseAddress);
+      const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
       const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
       console.log("API response:", response);
   } catch (error) {
