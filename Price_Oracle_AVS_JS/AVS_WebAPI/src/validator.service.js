@@ -15,7 +15,7 @@ async function validate(proofOfTask) {
       }
       return isApproved;
     } catch (err) {
-      console.error(err)
+      console.error(err?.message);
       return false;
     }
   }
