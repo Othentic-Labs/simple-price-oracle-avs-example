@@ -1,3 +1,15 @@
 POST http://localhost:4003/task/execute HTTP/1.1
 content-type: application/json
 
+{
+    "strategy": "0x7D704507b76571a51d9caE8AdDAbBFd0ba0e63d3"
+}
+#####
+
+POST http://localhost:4003/task/execute HTTP/1.1
+content-type: application/json
+
+{
+    "strategy": "0x7D704507b76571a51d9caE8AdDAbBFd0ba0e63d3",
+    "fakePrice": "217.01110000"
+}
