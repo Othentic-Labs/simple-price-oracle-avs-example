@@ -21,17 +21,17 @@ function init() {
 async function sendTask(cid) {
 
   var wallet = new ethers.Wallet(privateKey);
-  const proofHash = ethers.keccak256(AbiCoder.defaultAbiCoder().encode(['string'], [cid]));
-  const proofBytes = ethers.getBytes(proofHash);
-  var sig = await wallet.signMessage(proofBytes);
-
+  const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "address"], [cid, wallet.address]);
+  const messageHash = ethers.keccak256(message);
+  const sig = wallet.signingKey.sign(messageHash).serialized;
   const jsonRpcBody = {
     jsonrpc: "2.0",
     method: "sendTask",
     params: [
       cid,
       1,
-      sig
+      wallet.address,
+      sig,
     ]
   };
     try {
@@ -50,7 +50,7 @@ async function publishJSONToIpfs(data) {
     console.log(`cid: ${cid}`);
     return cid;
   }
-  
+
 module.exports = {
   init,
   publishJSONToIpfs,
