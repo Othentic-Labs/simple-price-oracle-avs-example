@@ -18,21 +18,13 @@ function init() {
   privateKey = process.env.PRIVATE_KEY;
 }
 
-async function sendTask(strategy, cid) {
-
-  var wallet = new ethers.Wallet(privateKey);
-  const message = ethers.AbiCoder.defaultAbiCoder().encode(["address", "string", "address"], [strategy, cid, wallet.address]);
-  const messageHash = ethers.keccak256(message);
-  const sig = wallet.signingKey.sign(messageHash).serialized;
+async function sendTask(definitionId, cid) {
   const jsonRpcBody = {
     jsonrpc: "2.0",
     method: "sendTask",
     params: [
-      strategy,
       cid,
-      1,
-      wallet.address,
-      sig,
+      definitionId,
     ]
   };
     try {

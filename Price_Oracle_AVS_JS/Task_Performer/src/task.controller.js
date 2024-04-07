@@ -12,10 +12,10 @@ router.post("/execute", async (req, res) => {
 
     try {
         const result = await oracleService.getPrice("ETHUSDT");
-        const { strategy, fakePrice } = req.body;
+        const { definitionId, fakePrice } = req.body;
         result.price = fakePrice || result.price;
         const cid = await dalService.publishJSONToIpfs(result);
-        await dalService.sendTask(strategy, cid);
+        await dalService.sendTask(definitionId, cid);
         return res.status(200).send(new CustomResponse(cid));
     } catch (error) {
         console.log(error)
