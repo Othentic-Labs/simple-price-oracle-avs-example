@@ -11,11 +11,14 @@ router.post("/execute", async (req, res) => {
     console.log("Executing task");
 
     try {
+        var taskDefinitionId = Number(req.body.taskDefinitionId) || 0;
+        console.log(`taskDefinitionId: ${taskDefinitionId}`);
+
         const result = await oracleService.getPrice("ETHUSDT");
         result.price = req.body.fakePrice || result.price;
         const cid = await dalService.publishJSONToIpfs(result);
-        await dalService.sendTask(cid);
-        return res.status(200).send(new CustomResponse(cid));
+        await dalService.sendTask(cid, taskDefinitionId);
+        return res.status(200).send(new CustomResponse({proofOfTask: cid, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
         console.log(error)
         return res.status(500).send(new CustomError("Something went wrong", {}));

@@ -18,19 +18,24 @@ function init() {
   privateKey = process.env.PRIVATE_KEY;
 }
 
-async function sendTask(cid) {
+async function sendTask(proofOfTask, taskDefinitionId) {
 
   var wallet = new ethers.Wallet(privateKey);
-  const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "address"], [cid, wallet.address]);
+  var performerAddress = wallet.address;
+  var taskInfo =  {proofOfTask, performerAddress, taskDefinitionId};
+
+  const message = ethers.AbiCoder.defaultAbiCoder().encode(["TaskInfo(string, address, uint16)"], [taskInfo]);
+
+  //const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "address"], [cid, wallet.address]);
   const messageHash = ethers.keccak256(message);
   const sig = wallet.signingKey.sign(messageHash).serialized;
   const jsonRpcBody = {
     jsonrpc: "2.0",
     method: "sendTask",
     params: [
-      cid,
-      1,
-      wallet.address,
+      proofOfTask,
+      taskDefinitionId,
+      performerAddress,
       sig,
     ]
   };
@@ -46,9 +51,9 @@ async function sendTask(cid) {
 async function publishJSONToIpfs(data) {
     const pinata = new pinataSDK(pinataApiKey, pinataSecretApiKey);
     const response = await pinata.pinJSONToIPFS(data);
-    const cid = response.IpfsHash;
-    console.log(`cid: ${cid}`);
-    return cid;
+    const proofOfTask = response.IpfsHash;
+    console.log(`proofOfTask: ${proofOfTask}`);
+    return proofOfTask;
   }
 
 module.exports = {
