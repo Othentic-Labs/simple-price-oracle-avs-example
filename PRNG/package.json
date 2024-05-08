@@ -1,0 +1,17 @@
+{
+  "name": "prng-avs",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Othentic Labs Ltd.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "dotenv": "16.4.5",
+    "ethers": "6.12.1",
+    "express": "4.19.2"
+  }
+}
