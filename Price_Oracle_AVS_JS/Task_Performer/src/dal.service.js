@@ -16,12 +16,12 @@ function init() {
   privateKey = process.env.PRIVATE_KEY;
 }
 
-async function sendTask(proofOfTask, taskDefinitionId) {
+async function sendTask(proofOfTask, data, taskDefinitionId) {
 
   var wallet = new ethers.Wallet(privateKey);
   var performerAddress = wallet.address;
 
-  const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "address", "uint16"], [proofOfTask, performerAddress, taskDefinitionId]);
+  const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "bytes", "address", "uint16"], [proofOfTask, data, performerAddress, taskDefinitionId]);
   const messageHash = ethers.keccak256(message);
   const sig = wallet.signingKey.sign(messageHash).serialized;
 
@@ -30,6 +30,7 @@ async function sendTask(proofOfTask, taskDefinitionId) {
     method: "sendTask",
     params: [
       proofOfTask,
+      data,
       taskDefinitionId,
       performerAddress,
       sig,
