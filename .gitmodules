@@ -1,0 +1,3 @@
+[submodule "PRNG/contracts/lib/forge-std"]
+	path = PRNG/contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
