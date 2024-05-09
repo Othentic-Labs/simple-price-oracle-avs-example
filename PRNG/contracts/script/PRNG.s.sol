@@ -30,6 +30,5 @@ contract PRNGDeploy is Script {
         vm.startBroadcast();
         PRNG prng = new PRNG(attestationCenter);
         IAttestationCenter(attestationCenter).setAvsLogic(address(prng));
-        // IAttestationCenter(attestationCenter).setAvsLogic(address(0));
     }
 }
