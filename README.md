@@ -20,14 +20,28 @@ docker-compose up --build
 
 ### PRNG AVS
 To run the Pseudo-Random Number Generator AVS demo, you must first deploy an
-instance of the `PRNG` contract:
-```console
-source .env
-cd PRNG/contracts/
-forge script PRNGDeploy --rpc-url $L2_RPC --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $L2_ETHERSCAN_API_KEY --chain $L2_CHAIN --sig="run(address)" $ATTESTATION_CENTER_ADDRESS
+instance of the `PRNG` contract.
+
+Add the following variables to your `.env` file:
+```bash
+L2_ETHERSCAN_API_KEY=...
+L2_VERIFIER_URL=...
+L2_RPC=...
+L2_CHAIN=...
 ```
 
-Then run the appropriate docker-compose configuration from the root directory:
+Go into the `PRNG/contracts/` directory and run `forge install`:
+```console
+cd PRNG/contracts/
+forge install
+```
+
+Run the install script:
+```console
+forge script PRNGDeploy --rpc-url $L2_RPC --private-key $PRIVATE_KEY --broadcast -vvvv --verify --etherscan-api-key $L2_ETHERSCAN_API_KEY --chain $L2_CHAIN --verifier-url $L2_VERIFIER_URL --sig="run(address)" $ATTESTATION_CENTER_ADDRESS
+```
+
+Then go back to the root directory and run the appropriate docker-compose configuration:
 ```console
 docker-compose -f prng.compose.yml up --build
 ```
