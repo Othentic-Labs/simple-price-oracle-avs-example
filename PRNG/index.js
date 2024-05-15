@@ -14,10 +14,11 @@ app.use(express.json());
 
 // L2 RPC provider
 const rpcUrl = process.env.L2_RPC;
+
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 
 // The AttestationCenter contract object
-const attestationCenterAddress = '0x5f7E34f3c2e86F57B4952Ee8EE9b48C4bc4Edd30';
+const attestationCenterAddress = process.env.ATTESTATION_CENTER_ADDRESS;
 const attestationCenterAbi = [
     'function operators(uint) public view returns (address, uint, uint, uint8)',
     'function numOfOperators() public view returns (uint)'
