@@ -26,7 +26,13 @@ async function healthcheckResults() {
 
         for (const operator of operators) {
             const isHealthy = await healthcheckOperator(operator);
-            result.operators.push({ operator, isHealthy });
+            const operatorAddress = await getOperatorAddress(operator);
+            if (isHealthy === null) {
+                throw new Error(`Error health checking operator: ${operator}`);
+            } else if (operatorAddress === null) {
+                throw new Error(`Error getting operator address: ${operator}`);
+            }
+            result.operators.push({ operator: operatorAddress, isHealthy });
         }
     } catch (error) {
         result = null;
@@ -55,19 +61,34 @@ async function getDiscoveredPeers() {
     return response;
 }
 
-// operator is url from discovered peers
-async function healthcheckOperator(operator) {
-    // in actual AVS, should call by operator's p2p address, but for now use table for ports
-
-    let port = 0;
-    if (operator.endsWith(OPERATORS_P2P[0])) {
-        port = 8546;
-    } else if (operator.endsWith(OPERATORS_P2P[1])) {
-        port = 8547;
-    } else if (operator.endsWith(OPERATORS_P2P[2])) {    
-        port = 8548;
+async function getOperatorAddress(operator) {
+    const port = operatorPort(operator);
+    if (port === 0) {
+        throw new Error("Operator not recognized");
     }
 
+    let address = null;
+    const jsonRpcBody = {
+        jsonrpc: "2.0",
+        method: "getOperatorInfo",
+        params: []
+    };
+
+    try {
+        const provider = new ethers.JsonRpcProvider(`http://0.0.0.0:${port}`);
+        const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
+        address = response.address;
+        console.log("getOperatorAddress API response:", address);
+    } catch (error) {
+        console.error("Error making API request:", error);
+    }
+
+    return address;
+}
+
+// operator is url from discovered peers
+async function healthcheckOperator(operator) {
+    const port = operatorPort(operator);
     if (port === 0) {
         throw new Error("Operator not recognized");
     }
@@ -90,6 +111,21 @@ async function healthcheckOperator(operator) {
     }
 
     return result;
+}
+
+function operatorPort(operator) {
+    // in actual AVS, should call by operator's p2p address, but for now use table for ports
+
+    let port = 0;
+    if (operator.endsWith(OPERATORS_P2P[0])) {
+        port = 8546;
+    } else if (operator.endsWith(OPERATORS_P2P[1])) {
+        port = 8547;
+    } else if (operator.endsWith(OPERATORS_P2P[2])) {    
+        port = 8548;
+    }
+
+    return port;
 }
 
 module.exports = {
