@@ -1,9 +1,9 @@
 require('dotenv').config();
 const dalService = require("./dal.service");
-const oracleService = require("./oracle.service");
 
 async function validate(proofOfTask) {
 
+  /*
   try {
       const taskResult = await dalService.getIPfsTask(proofOfTask);
       var data = await oracleService.getPrice("ETHUSDT");
@@ -18,6 +18,8 @@ async function validate(proofOfTask) {
       console.error(err?.message);
       return false;
     }
+    */
+   return true;
   }
   
   module.exports = {

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const pinataSDK = require("@pinata/sdk");
-const { ethers, AbiCoder } = require('ethers');
+const { ethers } = require('ethers');
 
 var pinataApiKey='';
 var pinataSecretApiKey='';
