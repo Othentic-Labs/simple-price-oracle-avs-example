@@ -1,13 +1,9 @@
 require('dotenv').config();
 const { ethers } = require('ethers');
 
-var rpcBaseAddress='';
+const JSON_RPC_PORT = 8545;
 
-const OPERATORS_P2P = [
-    '12D3KooWCAVja6rpuMNbQt7maA7phdPc1MVfe7A92BnvjBpdwzsW',  // Operator 1
-    '12D3KooWP1XoLGuqcGkNqhnZhxyKPHyXTUVYaUHqr8qMkbLmRdCS',  // Operator 2
-    '12D3KooWEvFVc4RQ7sH1B3uNSXaL2qTbVTe9tesw4t4yEkEX3sXU',  // Operator 3
-]
+var rpcBaseAddress='';
 
 function init() {
     rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
@@ -16,7 +12,7 @@ function init() {
 // currently simply uses getDiscoveredPeers to check if operators are healthy
 // potentially should randomly sample from all validators of the network
 async function healthcheckResults() {
-    let result = { operators: [] };
+    let result = { operators: [], timestamp: Date.now() };
 
     try {
         const operators = await getDiscoveredPeers();
@@ -24,7 +20,11 @@ async function healthcheckResults() {
             throw new Error("Error getting operators");
         }
 
-        for (const operator of operators) {
+        const operatorsIps = operators
+            .filter(x => x.split("/")[2].split(".")[0] !== "127") // filter out localhost
+            .map(x => x.split("/")[2]);  // get ip address
+
+        for (const operator of operatorsIps) {
             const isHealthy = await healthcheckOperator(operator);
             const operatorAddress = await getOperatorAddress(operator);
             if (isHealthy === null) {
@@ -62,11 +62,6 @@ async function getDiscoveredPeers() {
 }
 
 async function getOperatorAddress(operator) {
-    const port = operatorPort(operator);
-    if (port === 0) {
-        throw new Error("Operator not recognized");
-    }
-
     let address = null;
     const jsonRpcBody = {
         jsonrpc: "2.0",
@@ -75,7 +70,7 @@ async function getOperatorAddress(operator) {
     };
 
     try {
-        const provider = new ethers.JsonRpcProvider(`http://0.0.0.0:${port}`);
+        const provider = new ethers.JsonRpcProvider(`http://${operator}:${JSON_RPC_PORT}`);
         const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
         address = response.address;
         console.log("getOperatorAddress API response:", address);
@@ -88,11 +83,6 @@ async function getOperatorAddress(operator) {
 
 // operator is url from discovered peers
 async function healthcheckOperator(operator) {
-    const port = operatorPort(operator);
-    if (port === 0) {
-        throw new Error("Operator not recognized");
-    }
-
     let result = null;
     const jsonRpcBody = {
         jsonrpc: "2.0",
@@ -101,7 +91,7 @@ async function healthcheckOperator(operator) {
     };
 
     try {
-        const provider = new ethers.JsonRpcProvider(`http://0.0.0.0:${port}`);
+        const provider = new ethers.JsonRpcProvider(`http://${operator}:${JSON_RPC_PORT}`);
         const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
         result = response === "OK";
         console.log("healthcheck API response:", response);
@@ -111,21 +101,6 @@ async function healthcheckOperator(operator) {
     }
 
     return result;
-}
-
-function operatorPort(operator) {
-    // in actual AVS, should call by operator's p2p address, but for now use table for ports
-
-    let port = 0;
-    if (operator.endsWith(OPERATORS_P2P[0])) {
-        port = 8546;
-    } else if (operator.endsWith(OPERATORS_P2P[1])) {
-        port = 8547;
-    } else if (operator.endsWith(OPERATORS_P2P[2])) {    
-        port = 8548;
-    }
-
-    return port;
 }
 
 module.exports = {
