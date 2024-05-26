@@ -1,4 +1,5 @@
 require('dotenv').config();
+const validateHealthcheckResponse = require('./utils/validateHealthcheckResponse');
 const { getAddressByPeerID } = require('./db.service');
 const { ethers } = require('ethers');
 
@@ -144,6 +145,7 @@ async function getDiscoveredPeers() {
  */
 async function healthcheckOperator(ip, peerId, recentBlocknumber) {
   let response = null;
+  let isValid = false;
   const jsonRpcBody = {
     jsonrpc: "2.0",
     method: "healthcheck",
@@ -154,41 +156,9 @@ async function healthcheckOperator(ip, peerId, recentBlocknumber) {
     const l1Provider = new ethers.JsonRpcProvider(l1Rpc);
     const operatorProvider = new ethers.JsonRpcProvider(`http://${ip}:${JSON_RPC_PORT}`);
     response = await operatorProvider.send(jsonRpcBody.method, jsonRpcBody.params);
-
-    // 1. Verify that peerId in response matches peerId from discovered
-    if (response.peerId !== peerId) {
-      console.error("PeerID in response does not match");
-      return { response, isValid: false };
-    }
-
-    // 2. Verify blockhash and peerId is indeed signed by address
-    const payload = ethers.AbiCoder.defaultAbiCoder().encode(
-      ['uint256', 'string'],
-      [response.blockHash, response.peerId]
-    );
-    const message = ethers.getBytes(ethers.keccak256(payload));
-    const signature = response.signature;
-
-    const recoveredAddress = ethers.verifyMessage(message, signature);
-    if (recoveredAddress !== response.address) {
-      console.error("Recovered address does not match response address");
-      return { response, isValid: false };
-    }
-    
-    // 3. Verify that blocknumber really has said blockhash
-    const block = await l1Provider.getBlock(response.blockNumber);
-    if (block.hash !== response.blockHash) {
-      console.error("Block hash does not match response block hash");
-      return { response, isValid: false };
-    }
-
-    // 4. Verify that block is "recent" (no more than X blocks before)
-    if (recentBlocknumber - MAX_BLOCKS_PASSED > response.blockNumber) {
-      console.error("Signed block is too old");
-      return { response, isValid: false };
-    }
-    
     console.log("healthcheck API response:", response);
+
+    isValid = await validateHealthcheckResponse(response, { peerId, recentBlocknumber, maxBlocksPassed: MAX_BLOCKS_PASSED, chainProvider: l1Provider});
   } catch (error) {
     console.error("Error making API request:", error);
     return { response: null, isValid: false };
