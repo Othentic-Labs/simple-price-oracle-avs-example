@@ -14,13 +14,13 @@ router.post("/execute", async (req, res) => {
         var taskDefinitionId = Number(req.body.taskDefinitionId) || 0;
         console.log(`taskDefinitionId: ${taskDefinitionId}`);
 
-        const healthcheckResults = await healthcheckService.healthcheckResults();
-        if (!healthcheckResults) {
+        const healthcheckTask = await healthcheckService.performHealthcheck();
+        if (!healthcheckTask) {
             throw new Error("Healthcheck failed");
         }
 
-        console.log("Healthcheck results: ", healthcheckResults);
-        const cid = await dalService.publishJSONToIpfs(healthcheckResults);
+        console.log("Healthcheck task: ", healthcheckTask);
+        const cid = await dalService.publishJSONToIpfs(healthcheckTask);
         const data = "hello";
         await dalService.sendTask(cid, data, taskDefinitionId);
         return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
