@@ -1,0 +1,3 @@
+[submodule "Liveliness_AVS_JS/AVS_Logic/liveliness_registry/lib/forge-std"]
+	path = Liveliness_AVS_JS/AVS_Logic/liveliness_registry/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
