@@ -1,109 +1,203 @@
 require('dotenv').config();
+const { getAddressByPeerID } = require('./db.service');
 const { ethers } = require('ethers');
 
 const JSON_RPC_PORT = 8545;
+const MAX_BLOCKS_PASSED = 10;
+const CHECK_INTERVAL = 10000;
+const CHECKS = 1;
 
 var rpcBaseAddress='';
+var l1Rpc='';
 
-function init() {
-    rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
+// hacky af but it works
+const previousConsoleLog = console.log;
+console.log = (message, ...optionalParameters) => { 
+  if (message.startsWith("JsonRpcProvider failed to detect network and cannot start up;")) {
+    return;
+  }
+
+  previousConsoleLog(message, ...optionalParameters);
 }
 
-// currently simply uses getDiscoveredPeers to check if operators are healthy
-// potentially should randomly sample from all validators of the network
+const previousConsoleError = console.error;
+console.error = (message, ...optionalParameters) => {
+  if (message.startsWith("JsonRpcProvider failed to detect network and cannot start up;")) {
+    return;
+  }
+
+  previousConsoleError(message, ...optionalParameters);
+}
+
+function init() {
+  rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
+  l1Rpc = process.env.L1_RPC;
+}
+
 async function healthcheckResults() {
-    let result = { operators: [], timestamp: Date.now() };
+  // First: collect all operator responses
+  const l1Provider = new ethers.JsonRpcProvider(l1Rpc);
+  let taskData = { operators: [], timestamp: Date.now() };
 
-    try {
-        const operators = await getDiscoveredPeers();
-        if (operators === null) {
-            throw new Error("Error getting operators");
-        }
-
-        const operatorsIps = operators
-            .filter(x => x.split("/")[2].split(".")[0] !== "127") // filter out localhost
-            .map(x => x.split("/")[2]);  // get ip address
-
-        for (const operator of operatorsIps) {
-            const isHealthy = await healthcheckOperator(operator);
-            const operatorAddress = await getOperatorAddress(operator);
-            if (isHealthy === null) {
-                throw new Error(`Error health checking operator: ${operator}`);
-            } else if (operatorAddress === null) {
-                throw new Error(`Error getting operator address: ${operator}`);
-            }
-            result.operators.push({ operator: operatorAddress, isHealthy });
-        }
-    } catch (error) {
-        result = null;
-        console.error("Error health checking operators:", error);
+  try {
+    const peers = await getDiscoveredPeers();
+    if (peers === null) {
+      throw new Error("Error getting operators");
     }
+    
+    // list of { ip, peerId }
+    const operators = peers
+      .filter(x => x.split("/")[2].split(".")[0] !== "127") // filter out localhost
+      .map(x => {return { ip: x.split("/")[2], peerId: x.split("/")[6] }});
+    
+    console.log("Operators:", operators);
+    
+    for (const { ip, peerId } of operators) {
+      /*
+      include once AVSLogic is implemented
 
-    return result;
+      // skip peers that are not registered on chain
+      const operatorAddress = await getAddressByPeerID(peerId);
+      if (operatorAddress === null) {
+        console.log(`peer ${peerId} is not registered to AVS logic`);
+        continue;
+      }
+      */
+
+      const recentBlocknumber = await l1Provider.getBlockNumber();
+      let { response, isValid } = await healthcheckOperator(ip, peerId, recentBlocknumber);
+      if (isValid) {
+        taskData.operators.push({ operator: { ip, peerId }, response, isValid }); 
+      } else {
+        taskData.operators.push({ operator: { ip, peerId }, response: {}, isValid });
+      }
+    }
+  } catch (error) {
+    console.error("Error health checking operators: ", error);
+    return null;
+  }
+
+  console.log("Task Data (Step 1): ", taskData);
+
+  // Secondly: wait X minutes, check again all operators that are down
+  // TODO: should check them simulteniously (?)
+  try {
+    for (let i = 0; i < CHECKS; i++) {
+      await new Promise(resolve => setTimeout(resolve, CHECK_INTERVAL));
+      console.log(`performing check: ${i}`);
+
+      for (const operatorData of taskData.operators) {
+        if (operatorData.isValid) {
+          // skip operators that are valid
+          console.log("skipping valid operator");
+          continue;
+        }
+        const recentBlocknumber = await l1Provider.getBlockNumber();
+        const { response, isValid } = await healthcheckOperator(operatorData.operator.ip, operatorData.operator.peerId, recentBlocknumber);
+
+        if (isValid) {
+          taskData.operators.isValid = true;
+          taskData.operators.response = response;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error health checking operators: ", error);
+    return null;
+  }
+
+  return taskData;
 }
 
 async function getDiscoveredPeers() {
-    let response = null;
-    const jsonRpcBody = {
-        jsonrpc: "2.0",
-        method: "getDiscoveredPeers",
-        params: []
-    };
+  let response = null;
+  const jsonRpcBody = {
+    jsonrpc: "2.0",
+    method: "getDiscoveredPeers",
+    params: []
+  };
+  
+  try {
+    const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
+    response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
+    console.log("getDiscoveredPeers API response:", response);
+  } catch (error) {
+    console.error("Error making API request:", error);
+  }
+  
+  return response;
+}
+
+// TODO: refactor so performer and attesters share code of validating responses
+// operator is ip address
+// recentBlocknumber is the blocknumber the performer checks the blocknumber against
+
+/**
+ * format of response:
+ * {
+ *   address: address of operator
+ *   blockNumber: the most recent blockNumber operator has
+ *   blockHash: the blockHash go blockNumber
+ *   signature: sign(address.privateKey, [blockHash, peerId])
+ *   peerId: the peerId in the p2p communication 
+ * }
+ */
+async function healthcheckOperator(ip, peerId, recentBlocknumber) {
+  let response = null;
+  const jsonRpcBody = {
+    jsonrpc: "2.0",
+    method: "healthcheck",
+    params: []
+  };
+
+  try {
+    const l1Provider = new ethers.JsonRpcProvider(l1Rpc);
+    const operatorProvider = new ethers.JsonRpcProvider(`http://${ip}:${JSON_RPC_PORT}`);
+    response = await operatorProvider.send(jsonRpcBody.method, jsonRpcBody.params);
+
+    // 1. Verify that peerId in response matches peerId from discovered
+    if (response.peerId !== peerId) {
+      console.error("PeerID in response does not match");
+      return { response, isValid: false };
+    }
+
+    // 2. Verify blockhash and peerId is indeed signed by address
+    const payload = ethers.AbiCoder.defaultAbiCoder().encode(
+      ['uint256', 'string'],
+      [response.blockHash, response.peerId]
+    );
+    const message = ethers.getBytes(ethers.keccak256(payload));
+    const signature = response.signature;
+
+    const recoveredAddress = ethers.verifyMessage(message, signature);
+    if (recoveredAddress !== response.address) {
+      console.error("Recovered address does not match response address");
+      return { response, isValid: false };
+    }
     
-    try {
-        const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
-        response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-        console.log("getDiscoveredPeers API response:", response);
-    } catch (error) {
-        console.error("Error making API request:", error);
+    // 3. Verify that blocknumber really has said blockhash
+    const block = await l1Provider.getBlock(response.blockNumber);
+    if (block.hash !== response.blockHash) {
+      console.error("Block hash does not match response block hash");
+      return { response, isValid: false };
     }
 
-    return response;
-}
-
-async function getOperatorAddress(operator) {
-    let address = null;
-    const jsonRpcBody = {
-        jsonrpc: "2.0",
-        method: "getOperatorInfo",
-        params: []
-    };
-
-    try {
-        const provider = new ethers.JsonRpcProvider(`http://${operator}:${JSON_RPC_PORT}`);
-        const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-        address = response.address;
-        console.log("getOperatorAddress API response:", address);
-    } catch (error) {
-        console.error("Error making API request:", error);
+    // 4. Verify that block is "recent" (no more than X blocks before)
+    if (recentBlocknumber - MAX_BLOCKS_PASSED > response.blockNumber) {
+      console.error("Signed block is too old");
+      return { response, isValid: false };
     }
-
-    return address;
-}
-
-// operator is url from discovered peers
-async function healthcheckOperator(operator) {
-    let result = null;
-    const jsonRpcBody = {
-        jsonrpc: "2.0",
-        method: "healthcheck",
-        params: []
-    };
-
-    try {
-        const provider = new ethers.JsonRpcProvider(`http://${operator}:${JSON_RPC_PORT}`);
-        const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-        result = response === "OK";
-        console.log("healthcheck API response:", response);
-    } catch (error) {
-        result = false;
-        console.error("Error making API request:", error);
-    }
-
-    return result;
+    
+    console.log("healthcheck API response:", response);
+  } catch (error) {
+    console.error("Error making API request:", error);
+    return { response: null, isValid: false };
+  }
+  
+  return { response, isValid: true };
 }
 
 module.exports = {
-    init,
-    healthcheckResults,
+  init,
+  healthcheckResults,
 }
