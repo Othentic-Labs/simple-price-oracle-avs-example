@@ -1,8 +1,7 @@
 require('dotenv').config();
 const dalService = require("./dal.service");
 const { getOperatorsLength, getOperator} = require("./db.service");
-const { healthcheckOperator } = require("./healthcheck.service");
-const validateHealthcheckResponse = require("./utils/validateHealthcheckResponse");
+const { healthcheck } = require("common_liveliness");
 const { ethers } = require('ethers');
 
 let l2Rpc;
@@ -26,7 +25,7 @@ async function validate(proofOfTask) {
   const chosenOperator = await getOperator(chosenOperatorIndex, blockHash);
   
   if (isValid) {
-    const isValidCheck = validateHealthcheckResponse(response, { blockHash });
+    const isValidCheck = healthcheck.validateHealthcheckResponse(response, { blockHash });
     if (!isValidCheck) {
       return false;
     }
@@ -36,7 +35,7 @@ async function validate(proofOfTask) {
       return false;
     }
   } else {
-    const { isValid: isValidCheck } = healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
+    const { isValid: isValidCheck } = healthcheck.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
     if (isValidCheck === null) {
       throw new Error("Error performing healthcheck on operator: ", chosenOperator);
     }

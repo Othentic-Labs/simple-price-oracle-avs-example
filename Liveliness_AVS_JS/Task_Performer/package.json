@@ -13,6 +13,7 @@
   "dependencies": {
     "@pinata/sdk": "^2.1.0",
     "@types/axios": "^0.14.0",
+    "common_liveliness": "../Common_Liveliness",
     "axios": "^1.1.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",

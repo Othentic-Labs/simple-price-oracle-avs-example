@@ -71,8 +71,10 @@ services:
         ipv4_address: 10.8.0.4
   avs-webapi:
     build:
-      context: ./Liveliness_AVS_JS/AVS_WebAPI
+      context: ./Liveliness_AVS_JS
       dockerfile: ./Dockerfile
+      args:
+        - PACKAGE_NAME=AVS_WebAPI
     env_file:
       - .env
     networks:
@@ -80,8 +82,10 @@ services:
         ipv4_address: 10.8.0.42
   task-performer:
     build:
-      context: ./Liveliness_AVS_JS/Task_Performer
+      context: ./Liveliness_AVS_JS
       dockerfile: ./Dockerfile
+      args:
+        - PACKAGE_NAME=Task_Performer
     environment:
       - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
     env_file:
