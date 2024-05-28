@@ -11,7 +11,7 @@ function init() {
 
 // TODO: handle case that operators change between healthcheck and validation
 // TODO: handle case format of IPFS file is invalid (punish performer)
-async function validate(proofOfTask) {
+async function validate(proofOfTask, data) {
   const l2Provider = new ethers.JsonRpcProvider(l2Rpc);
   const taskResult = await dalService.getIPfsTask(proofOfTask);
   
@@ -31,6 +31,18 @@ async function validate(proofOfTask) {
   console.log({ chosenOperator, chosenOperatorCheck });
   if (chosenOperator.operatorAddress !== chosenOperatorCheck.operatorAddress || chosenOperator.endpoint !== chosenOperatorCheck.endpoint) {
     console.log("Chosen operator is different from chosen operator in task");
+    return false;
+  }
+
+  // data is chosenOperator.operatorAddress in order to read on-chain` 
+  const dataCheck = ethers.AbiCoder.defaultAbiCoder().encode(
+    ["address"],
+    [chosenOperator.operatorAddress]
+  );
+
+  console.log({ data, dataCheck })
+  if (data !== dataCheck) {
+    console.log("Data field is different from chosen operator address");
     return false;
   }
 

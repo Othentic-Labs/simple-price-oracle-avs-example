@@ -1,5 +1,6 @@
 "use strict";
 const { Router } = require("express")
+const { ethers } = require("ethers");
 const CustomError = require("./utils/validateError");
 const CustomResponse = require("./utils/validateResponse");
 const dalService = require("./dal.service");
@@ -21,7 +22,11 @@ router.post("/execute", async (req, res) => {
 
         console.log("Healthcheck task: ", healthcheckTask);
         const cid = await dalService.publishJSONToIpfs(healthcheckTask);
-        const data = "hello";
+        const data = ethers.AbiCoder.defaultAbiCoder().encode( 
+            ["address"],
+            [healthcheckTask.chosenOperator.operatorAddress]
+        );
+
         await dalService.sendTask(cid, data, taskDefinitionId);
         return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
