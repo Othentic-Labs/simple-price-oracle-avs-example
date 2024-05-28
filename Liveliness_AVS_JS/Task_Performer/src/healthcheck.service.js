@@ -7,28 +7,6 @@ const { getOperatorsLength, getOperator } = require('./db.service');
 var rpcBaseAddress='';
 var l2Rpc='';
 
-// hacky af but it works
-// ethers continously logs if it can't connect to the network
-/*
-const previousConsoleLog = console.log;
-console.log = (message, ...optionalParameters) => { 
-  if (message.startsWith("JsonRpcProvider failed to detect network and cannot start up;")) {
-    return;
-  }
-
-  previousConsoleLog(message, ...optionalParameters);
-}
-
-const previousConsoleError = console.error;
-console.error = (message, ...optionalParameters) => {
-  if (message.startsWith("JsonRpcProvider failed to detect network and cannot start up;")) {
-    return;
-  }
-
-  previousConsoleError(message, ...optionalParameters);
-}
-*/
-
 function init() {
   console.log(healthcheck);
   rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
