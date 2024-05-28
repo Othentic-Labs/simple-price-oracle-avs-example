@@ -20,7 +20,7 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
     uint256 constant private PENALTY_COST = 1000;
 
     mapping(address => Registration) public registrations;
-    mapping(address => uint256) private penalties;
+    mapping(address => uint256) internal penalties;
     IAvsGovernance public avsGovernance;
 
     constructor(IAvsGovernance _avsGovernance) Ownable(msg.sender) {
@@ -66,13 +66,22 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
         emit OperatorRegistered(msg.sender, _endpoint);
     }
 
+    // in order to unregister you need to also be unregisterd from AVS 
+    function unregister() external registeredOperator(msg.sender) {
+        uint256 operatorIndex = avsGovernance.operatorsIndexs(msg.sender);
+        if (operatorIndex != 0) {
+            revert OperatorInAVS();
+        }
+
+        // NOTE: Might make sense to simply switch a flag in order to save gas
+        delete registrations[msg.sender];
+        emit OperatorUnregistered(msg.sender);
+    }
+
     function penalizeOperator(address _operator) external onlyOwner() {
         penalties[_operator] += 1;
         emit OperatorPenalized(_operator);
     }
 
-    // TODO: add unregistration function
-
-    error OperatorNotInAVS();
-    error OperatorNotRegistered();
+    // TODO: might make sense to add "isOperatorRegistered"
 }
