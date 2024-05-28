@@ -11,11 +11,11 @@ const operators = [
     },
     {
         operatorAddress: "0x4aBa6BC2efa0C5b5dE5382eb9895847252ed23Ed",
-        endpoint: "http://10.8.0.2:8545",
+        endpoint: "http://10.8.0.3:8545",
     },
     {
         operatorAddress: "0x1B6dBf8213a1c6B7A18B7a97be1e0F3A171af7D2",
-        endpoint: "http://10.8.0.2:8545",
+        endpoint: "http://10.8.0.4:8545",
     },
 ];
 
