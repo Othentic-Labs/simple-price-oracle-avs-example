@@ -17,34 +17,48 @@ async function validate(proofOfTask) {
   const taskResult = await dalService.getIPfsTask(proofOfTask);
   
   const { blockHash, response, isValid } = taskResult;
-  const block = l2Provider.getBlock(blockHash);
-  const blockNumber = block.number;
+  const getBlockByHashRequest = {
+    jsonrpc: "2.0",
+    method: "eth_getBlockByHash",
+    params: [blockHash, false]
+  };
+  const block = await l2Provider.send(getBlockByHashRequest.method, getBlockByHashRequest.params);
+  // console.log("Block from eth_getBlockByHash: ", block);
+  // ethers getBlock doesn't work with blockhash so need to use specific RPC method,
+  // but number is returned as hexstring, unlinke in getBlock method which returns as number
+  const blockNumber = parseInt(block.number, 16);
   
   const operatorsLength = await getOperatorsLength(blockHash);
   const chosenOperatorIndex = (blockHash % operatorsLength);
   const chosenOperator = await getOperator(chosenOperatorIndex, blockHash);
   
   if (isValid) {
-    const isValidCheck = healthcheck.validateHealthcheckResponse(response, { blockHash });
+    console.log("isValid is true, validating response with: ", { response, blockHash });
+    const isValidCheck = await healthcheck.validateHealthcheckResponse(response, { blockHash });
     if (!isValidCheck) {
+      console.log("Response is invalid");
       return false;
     }
     
     const isChosenOperatorCorrect = chosenOperator.operatorAddress === response.address;
+    console.log("chosen operator check: ", { isChosenOperatorCorrect, chosenOperator, response });
     if (!isChosenOperatorCorrect) {
+      console.log("Chosen operator is incorrect");
       return false;
     }
   } else {
-    const { isValid: isValidCheck } = healthcheck.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
+    console.log("isValid is false, performing healthcheck on operator: ", { chosenOperator, chosenOperatorIndex, blockNumber, blockHash});
+    const { isValid: isValidCheck } = await healthcheck.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
     if (isValidCheck === null) {
       throw new Error("Error performing healthcheck on operator: ", chosenOperator);
     }
     
     if (isValidCheck) {
+      console.log("Healthcheck is valid");
       return false;
     }
   }
-  
+
   return true;
 }
 
