@@ -2,8 +2,10 @@
 pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
-import { IAvsGovernance } from "contracts/interfaces/IAvsGovernance.sol";
-import { LivelinessRegistry } from "contracts/LivelinessRegistry.sol";
+// import { IAvsGovernance } from "@othentic/contracts/src/NetworkManagement/L1/interfaces/IAvsGovernance.sol";
+// using local interface until added functions are merged
+import { IAvsGovernance } from "src/interfaces/IAvsGovernance.sol";
+import { LivelinessRegistry } from "src/LivelinessRegistry.sol";
 
 contract Constructor is Test {
     address constant private OWNER = address(1);

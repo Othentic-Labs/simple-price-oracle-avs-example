@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.20;
 
-import { IAvsGovernance } from "contracts/interfaces/IAvsGovernance.sol";
-import { ILivelinessRegistry } from "contracts/interfaces/ILivelinessRegistry.sol";
+// import { IAvsGovernance } from "@othentic/contracts/src/NetworkManagement/L1/interfaces/IAvsGovernance.sol";
+// using local interface until added functions are merged
+import { IAvsGovernance } from "src/interfaces/IAvsGovernance.sol";
+import { ILivelinessRegistry } from "src/interfaces/ILivelinessRegistry.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 // contract should be owned by AvsGovernance
