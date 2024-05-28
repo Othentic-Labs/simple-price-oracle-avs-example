@@ -1,9 +1,3 @@
-require("dotenv").config();
-
-function init() {
-
-}
-
 const operators = [
     {
         operatorAddress: "0xaD9D986d612B291A64cbdce1B3f50a95B66D68D3",
@@ -28,8 +22,16 @@ async function getOperator(operatorIndex, blockhash) {
     return operators[operatorIndex];
 }
 
+async function getChosenOperator(blockHash) {
+    const operatorsLength = await getOperatorsLength(blockHash);
+    // NOTE: there is slight modulo bias but assumes number of operators is small enough it doesn't matter
+    // NOTE: maybe should use RANDAO instead of blockhash since miner can manipulate blockhash      
+    const chosenOperatorIndex = (blockHash % operatorsLength);
+    return await getOperator(chosenOperatorIndex, blockHash);
+}
+
 module.exports = {
-    init,
     getOperatorsLength,
     getOperator,
+    getChosenOperator,
 }

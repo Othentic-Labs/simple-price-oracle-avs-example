@@ -1,7 +1,6 @@
 require('dotenv').config();
 const dalService = require("./dal.service");
-const { getOperatorsLength, getOperator} = require("./db.service");
-const { healthcheck } = require("common_liveliness");
+const { healthcheck, db } = require("common_liveliness");
 const { ethers } = require('ethers');
 
 let l2Rpc;
@@ -28,10 +27,13 @@ async function validate(proofOfTask) {
   // but number is returned as hexstring, unlinke in getBlock method which returns as number
   const blockNumber = parseInt(block.number, 16);
   
-  const operatorsLength = await getOperatorsLength(blockHash);
-  const chosenOperatorIndex = (blockHash % operatorsLength);
-  const chosenOperator = await getOperator(chosenOperatorIndex, blockHash);
-  
+  const chosenOperatorCheck = await db.getChosenOperator(blockHash);
+  console.log({ chosenOperator, chosenOperatorCheck });
+  if (chosenOperator.operatorAddress !== chosenOperatorCheck.operatorAddress || chosenOperator.endpoint !== chosenOperatorCheck.endpoint) {
+    console.log("Chosen operator is different from chosen operator in task");
+    return false;
+  }
+
   if (isValid) {
     console.log("isValid is true, validating response with: ", { response, blockHash });
     const isValidCheck = await healthcheck.validateHealthcheckResponse(response, { blockHash });
