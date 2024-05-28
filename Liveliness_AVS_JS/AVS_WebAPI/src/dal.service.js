@@ -13,6 +13,7 @@ async function getIPfsTask(cid) {
     const { data } = await axios.get(ipfsHost + cid);
     return {
       blockHash: data.blockHash,
+      chosenOperator: data.chosenOperator,
       response: data.response,
       isValid: data.isValid,
     };

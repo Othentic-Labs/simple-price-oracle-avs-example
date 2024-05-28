@@ -15,7 +15,7 @@ async function validate(proofOfTask, data) {
   const l2Provider = new ethers.JsonRpcProvider(l2Rpc);
   const taskResult = await dalService.getIPfsTask(proofOfTask);
   
-  const { blockHash, response, isValid } = taskResult;
+  const { blockHash, chosenOperator, response, isValid } = taskResult;
   const getBlockByHashRequest = {
     jsonrpc: "2.0",
     method: "eth_getBlockByHash",

@@ -30,6 +30,7 @@ async function performHealthcheck() {
 
   const task = {
     blockHash,
+    chosenOperator,
     response,
     isValid,
   }
