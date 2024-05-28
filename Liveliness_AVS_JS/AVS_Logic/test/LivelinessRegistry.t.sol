@@ -3,9 +3,7 @@ pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
 import { CommonBase } from "forge-std/Base.sol";
-// import { IAvsGovernance } from "@othentic/contracts/src/NetworkManagement/L1/interfaces/IAvsGovernance.sol";
-// using local interface until added functions are merged
-import { IAvsGovernance } from "src/interfaces/IAvsGovernance.sol";
+import { IAvsGovernance } from "@othentic/contracts/src/NetworkManagement/L1/interfaces/IAvsGovernance.sol";
 import { ExposedLivelinessRegistry } from "test/exposes/ExposedLivelinessRegistry.sol";
 
 contract Shared is CommonBase {
