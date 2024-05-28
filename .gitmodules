@@ -4,3 +4,6 @@
 [submodule "Liveliness_AVS_JS/AVS_Logic/lib/openzeppelin-contracts"]
 	path = Liveliness_AVS_JS/AVS_Logic/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "Liveliness_AVS_JS/AVS_Logic/lib/contracts"]
+	path = Liveliness_AVS_JS/AVS_Logic/lib/contracts
+	url = https://github.com/Othentic-Labs/contracts
