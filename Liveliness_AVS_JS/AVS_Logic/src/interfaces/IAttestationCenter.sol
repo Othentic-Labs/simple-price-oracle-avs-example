@@ -46,6 +46,8 @@ interface IAttestationCenter {
 
     function operatorsIdsByAddress(address) external view returns (uint256);
 
+    function avsLogic() external view returns (address);
+
     function submitTask(TaskInfo calldata _taskInfo, bool _isApproved, bytes calldata _tpSignature, uint256[2] calldata _taSignature, uint256[] calldata _operatorIds) external;
 
     function requestPayment(uint256 _operatorId) external;
@@ -60,4 +62,5 @@ interface IAttestationCenter {
 
     function transferAvsGovernance(address _newAvsGovernanceMultisig) external;
 
+    function setAvsLogic(address _avsLogic) external;
 }

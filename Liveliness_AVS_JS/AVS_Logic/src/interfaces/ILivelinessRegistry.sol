@@ -6,6 +6,7 @@ interface ILivelinessRegistry {
     event OperatorUnregistered(address operator);
     event OperatorPenalized(address operator);
 
+    function registrations(address operator) external view returns (uint256 operatorIndex, uint256 blockNumber, string memory endpoint);
     function getLivelinessScore(address operator) external view returns (uint256);
     function register(string memory endpoint) external;
 
