@@ -10,6 +10,7 @@ function init() {
 }
 
 async function getIPfsTask(cid) {
+  try {
     const { data } = await axios.get(ipfsHost + cid);
     return {
       blockHash: data.blockHash,
@@ -17,7 +18,11 @@ async function getIPfsTask(cid) {
       response: data.response,
       isValid: data.isValid,
     };
-  }  
+  } catch (e) {
+    console.error("could not read task from IPFS", e);
+    return null;
+  }
+}  
   
 module.exports = {
   init,
