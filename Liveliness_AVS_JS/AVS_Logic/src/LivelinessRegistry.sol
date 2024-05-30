@@ -10,8 +10,6 @@ import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
 import { ILivelinessRegistry } from "src/interfaces/ILivelinessRegistry.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-// contract should be owned by AvsGovernance
-// TODO: should be upgradable, switch later 
 contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
     // can operator indicies change? (e.g. unregistration from AVS)
     struct Registration {
@@ -97,7 +95,7 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
     ) external onlyAttestationCenter() {
         (address operator, bool isValid) = abi.decode(_taskInfo.data, (address, bool));
 
-        if (_isApproved && isValid) {
+        if (_isApproved && !isValid) {
             penalties[operator]++;
             emit OperatorPenalized(operator);
         }
@@ -112,17 +110,4 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
     ) external {
         // no implementation
     }
-
-    /*
-    function afterTaskSubmission(IAttestationCenter.TaskInfo calldata _taskInfo, bool _isApproved, bytes calldata _tpSignature, uint256[2] calldata _taSignature, uint256[] calldata _operatorIds) external {
-
-    }
-
-    function beforeTaskSubmission(IAttestationCenter.TaskInfo calldata _taskInfo, bool _isApproved, bytes calldata _tpSignature, uint256[2] calldata _taSignature, uint256[] calldata _operatorIds) external {
-
-    }
-    */
-
-
-    // TODO: might make sense to add "isOperatorRegistered"
 }

@@ -164,7 +164,7 @@ contract AfterTaskSubmission is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
-        bytes memory data = abi.encode(OPERATOR, true);
+        bytes memory data = abi.encode(OPERATOR, false);
         IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
         uint256[] memory operatorIds = new uint256[](0);
         vm.expectEmit(address(registry));
@@ -208,7 +208,7 @@ contract AfterTaskSubmission is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
-        bytes memory data = abi.encode(OPERATOR, false);
+        bytes memory data = abi.encode(OPERATOR, true);
         IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
         uint256[] memory operatorIds = new uint256[](0);
         vm.prank(address(ATTESTATION_CENTER));
