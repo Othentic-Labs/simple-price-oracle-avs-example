@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require("axios");
+const { dalService } = require('common_liveliness');
 
 let ipfsHost='';
 let l2Rpc='';
@@ -26,5 +27,6 @@ async function getIPfsTask(cid) {
   
 module.exports = {
   init,
-  getIPfsTask
+  getIPfsTask,
+  ...dalService
 }

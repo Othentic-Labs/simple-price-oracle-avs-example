@@ -1,13 +1,12 @@
 require('dotenv').config();
 const pinataSDK = require("@pinata/sdk");
 const { ethers } = require('ethers');
+const { dalService } = require('common_liveliness');
 
 var pinataApiKey='';
 var pinataSecretApiKey='';
 var rpcBaseAddress='';
 var privateKey='';
-
-
 
 function init() {
   pinataApiKey = process.env.PINATA_API_KEY;
@@ -63,5 +62,6 @@ async function publishJSONToIpfs(data) {
 module.exports = {
   init,
   publishJSONToIpfs,
-  sendTask
+  sendTask,
+  ...dalService,
 }

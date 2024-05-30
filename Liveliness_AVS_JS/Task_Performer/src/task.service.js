@@ -1,7 +1,5 @@
 "use strict";
 const { ethers } = require("ethers");
-const CustomError = require("./utils/validateError");
-const CustomResponse = require("./utils/validateResponse");
 const dalService = require("./dal.service");
 const healthcheckService = require("./healthcheck.service");
 
@@ -23,10 +21,8 @@ async function performHealthcheckTask() {
         );
 
         await dalService.sendTask(cid, data, taskDefinitionId);
-        // return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
         console.log(error)
-        // return res.status(500).send(new CustomError("Something went wrong", {}));
     }
 }
 

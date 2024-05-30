@@ -1,9 +1,9 @@
-const healthcheck = require('./src/healthcheck.service');
-const db = require('./src/db.service');
+const healthcheckService = require('./src/healthcheck.service');
+const dalService = require('./src/dal.service');
 const util = require('./src/util');
 
 module.exports = {
-    healthcheck,
-    db,
+    healthcheckService,
+    dalService,
     util,
 };

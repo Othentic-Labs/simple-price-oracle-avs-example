@@ -1,6 +1,6 @@
 require('dotenv').config();
 const dalService = require("./dal.service");
-const { healthcheck, db } = require("common_liveliness");
+const { healthcheckService } = require("common_liveliness");
 const { ethers } = require('ethers');
 
 let l2Rpc;
@@ -32,7 +32,7 @@ async function validate(proofOfTask, data) {
   // but number is returned as hexstring, unlinke in getBlock method which returns as number
   const blockNumber = parseInt(block.number, 16);
 
-  const chosenOperatorCheck = await db.getChosenOperator(blockHash, {
+  const chosenOperatorCheck = await dalService.getChosenOperator(blockHash, {
     attestationCenterAddress, 
     provider: l2Provider
   });
@@ -48,8 +48,6 @@ async function validate(proofOfTask, data) {
     [chosenOperator.operatorAddress, isValid]
   );
 
-
-
   console.log({ data, dataCheck })
   if (data !== dataCheck) {
     console.log("Data field is different from chosen operator address");
@@ -58,7 +56,7 @@ async function validate(proofOfTask, data) {
 
   if (isValid) {
     console.log("isValid is true, validating response with: ", { response, blockHash });
-    const isValidCheck = await healthcheck.validateHealthcheckResponse(response, { blockHash });
+    const isValidCheck = await healthcheckService.validateHealthcheckResponse(response, { blockHash });
     if (!isValidCheck) {
       console.log("Response is invalid");
       return false;
@@ -72,7 +70,7 @@ async function validate(proofOfTask, data) {
     }
   } else {
     console.log("isValid is false, performing healthcheck on operator: ", { chosenOperator, blockNumber, blockHash});
-    const { isValid: isValidCheck } = await healthcheck.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
+    const { isValid: isValidCheck } = await healthcheckService.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
     if (isValidCheck === null) {
       throw new Error("Error performing healthcheck on operator: ", chosenOperator);
     }

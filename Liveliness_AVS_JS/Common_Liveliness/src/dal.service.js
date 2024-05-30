@@ -31,7 +31,6 @@ async function getChosenOperator(blockHash, { attestationCenterAddress, provider
     const operatorsLength = await getOperatorsLength(blockHash, { attestationCenterAddress, provider });
     // NOTE: there is slight modulo bias but assumes number of operators is small enough it doesn't matter
     // NOTE: maybe should use RANDAO instead of blockhash since miner can manipulate blockhash
-    console.log({blockHash, operatorsLength});
     const chosenOperatorIndex = (BigInt(blockHash) % BigInt(operatorsLength)) + 1n;
     return await getOperator(chosenOperatorIndex, blockHash, { attestationCenterAddress, provider });
 }
