@@ -4,16 +4,21 @@ const { healthcheck, db } = require("common_liveliness");
 const { ethers } = require('ethers');
 
 let l2Rpc;
+let attestationCenterAddress;
 
 function init() {
   l2Rpc = process.env.L2_RPC;
+  attestationCenterAddress = process.env.ATTESTATION_CENTER_ADDRESS;
 }
 
-// TODO: handle case that operators change between healthcheck and validation
-// TODO: handle case format of IPFS file is invalid (punish performer)
 async function validate(proofOfTask, data) {
   const l2Provider = new ethers.JsonRpcProvider(l2Rpc);
   const taskResult = await dalService.getIPfsTask(proofOfTask);
+
+  if (taskResult === null) {
+    console.log("Task not found in IPFS");
+    return false;
+  }
   
   const { blockHash, chosenOperator, response, isValid } = taskResult;
   const getBlockByHashRequest = {
@@ -26,9 +31,12 @@ async function validate(proofOfTask, data) {
   // ethers getBlock doesn't work with blockhash so need to use specific RPC method,
   // but number is returned as hexstring, unlinke in getBlock method which returns as number
   const blockNumber = parseInt(block.number, 16);
-  
-  const chosenOperatorCheck = await db.getChosenOperator(blockHash);
-  console.log({ chosenOperator, chosenOperatorCheck });
+
+  const chosenOperatorCheck = await db.getChosenOperator(blockHash, {
+    attestationCenterAddress, 
+    provider: l2Provider
+  });
+
   if (chosenOperator.operatorAddress !== chosenOperatorCheck.operatorAddress || chosenOperator.endpoint !== chosenOperatorCheck.endpoint) {
     console.log("Chosen operator is different from chosen operator in task");
     return false;
@@ -39,6 +47,8 @@ async function validate(proofOfTask, data) {
     ["address", "bool"],
     [chosenOperator.operatorAddress, isValid]
   );
+
+
 
   console.log({ data, dataCheck })
   if (data !== dataCheck) {
@@ -61,7 +71,7 @@ async function validate(proofOfTask, data) {
       return false;
     }
   } else {
-    console.log("isValid is false, performing healthcheck on operator: ", { chosenOperator, chosenOperatorIndex, blockNumber, blockHash});
+    console.log("isValid is false, performing healthcheck on operator: ", { chosenOperator, blockNumber, blockHash});
     const { isValid: isValidCheck } = await healthcheck.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
     if (isValidCheck === null) {
       throw new Error("Error performing healthcheck on operator: ", chosenOperator);

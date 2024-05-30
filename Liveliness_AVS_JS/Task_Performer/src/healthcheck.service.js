@@ -5,11 +5,12 @@ const { healthcheck, db } = require('common_liveliness');
 
 var rpcBaseAddress='';
 var l2Rpc='';
+var attestationCenterAddress='';
 
 function init() {
-  console.log(healthcheck);
   rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
   l2Rpc = process.env.L2_RPC;
+  attestationCenterAddress = process.env.ATTESTATION_CENTER_ADDRESS;
 }
 
 async function performHealthcheck() {
@@ -18,14 +19,19 @@ async function performHealthcheck() {
   const blockNumber = recentBlock.number;
   const blockHash = recentBlock.hash;
   
-  const chosenOperator = await db.getChosenOperator(blockHash);
+  const chosenOperator = await db.getChosenOperator(
+    blockHash, 
+    {
+      attestationCenterAddress, 
+      provider: l2Provider
+    }
+  );
 
   const healthcheckResult = await healthcheck.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
   if (healthcheckResult === null) {
     throw new Error("Error performing healthcheck");
   }
 
-  // TODO: add retries
   let { response, isValid } = healthcheckResult;
 
   const task = {
