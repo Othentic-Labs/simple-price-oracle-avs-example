@@ -8,9 +8,9 @@ interface ILivelinessRegistry {
 
     function getLivelinessScore(address operator) external view returns (uint256);
     function register(string memory endpoint) external;
-    function penalizeOperator(address operator) external;
 
     error OperatorInAVS();
     error OperatorNotInAVS();
     error OperatorNotRegistered();
+    error Unauthorized();
 }

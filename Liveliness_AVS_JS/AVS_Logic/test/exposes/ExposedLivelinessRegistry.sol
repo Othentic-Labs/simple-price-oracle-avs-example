@@ -12,4 +12,13 @@ contract ExposedLivelinessRegistry is LivelinessRegistry {
     function getPenalties(address _operator) external view returns (uint256) {
         return penalties[_operator];
     }
+
+    // Helper function for tests
+    // can't mock the counts of penalites in tests because it's an internal variable and
+    // not a function call
+    //
+    // Also storage cheats are annoying and unmaintainable
+    function setOperatorPenalites(address _operator, uint256 _penalties) external {
+        penalties[_operator] = _penalties;
+    }
 }

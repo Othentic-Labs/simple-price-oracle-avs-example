@@ -3,13 +3,16 @@ pragma solidity >=0.8.20;
 
 // comment in once interface is updated in main
 // import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
+// comment in once interface is updated in main
+// import { IAvsLogic } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAvsLogic.sol";
+import { IAvsLogic } from "src/interfaces/IAvsLogic.sol";
 import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
 import { ILivelinessRegistry } from "src/interfaces/ILivelinessRegistry.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 // contract should be owned by AvsGovernance
 // TODO: should be upgradable, switch later 
-contract LivelinessRegistry is ILivelinessRegistry, Ownable {
+contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
     // can operator indicies change? (e.g. unregistration from AVS)
     struct Registration {
         uint256 operatorIndex;
@@ -23,7 +26,7 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
     mapping(address => uint256) internal penalties;
     IAttestationCenter public attestationCenter;
 
-    constructor(IAttestationCenter _attestationCenter) Ownable(msg.sender) {
+    constructor(IAttestationCenter _attestationCenter) {
         attestationCenter = _attestationCenter;
     }
 
@@ -40,6 +43,13 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
         uint256 operatorIndex = attestationCenter.operatorsIdsByAddress(msg.sender);
         if (operatorIndex == 0) {
             revert OperatorNotInAVS();
+        }
+        _;
+    }
+
+    modifier onlyAttestationCenter() {
+        if (msg.sender != address(attestationCenter)) {
+            revert Unauthorized();
         }
         _;
     }
@@ -78,10 +88,39 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
         emit OperatorUnregistered(msg.sender);
     }
 
-    function penalizeOperator(address _operator) external onlyOwner() {
-        penalties[_operator] += 1;
-        emit OperatorPenalized(_operator);
+    function afterTaskSubmission(
+        TaskInfo calldata _taskInfo, 
+        bool _isApproved, 
+        bytes calldata /* _tpSignature */, 
+        uint256[2] calldata /* _taSignature */, 
+        uint256[] calldata /* _operatorIds */
+    ) external onlyAttestationCenter() {
+        if (_isApproved) {
+            penalties[_taskInfo.taskPerformer]++;
+            emit OperatorPenalized(_taskInfo.taskPerformer);
+        }
     }
+
+    function beforeTaskSubmission(
+        TaskInfo calldata /* _taskInfo */, 
+        bool /* _isApproved */, 
+        bytes calldata /* _tpSignature */, 
+        uint256[2] calldata /* _taSignature */, 
+        uint256[] calldata /* _operatorIds */
+    ) external {
+        // no implementation
+    }
+
+    /*
+    function afterTaskSubmission(IAttestationCenter.TaskInfo calldata _taskInfo, bool _isApproved, bytes calldata _tpSignature, uint256[2] calldata _taSignature, uint256[] calldata _operatorIds) external {
+
+    }
+
+    function beforeTaskSubmission(IAttestationCenter.TaskInfo calldata _taskInfo, bool _isApproved, bytes calldata _tpSignature, uint256[2] calldata _taSignature, uint256[] calldata _operatorIds) external {
+
+    }
+    */
+
 
     // TODO: might make sense to add "isOperatorRegistered"
 }

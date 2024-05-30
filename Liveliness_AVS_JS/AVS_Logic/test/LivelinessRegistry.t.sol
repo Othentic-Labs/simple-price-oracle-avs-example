@@ -3,12 +3,16 @@ pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
 import { CommonBase } from "forge-std/Base.sol";
+import { StdCheats } from "forge-std/StdCheats.sol";
 // comment in once interface is updated in main
 // import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
+// comment in once interface is updated in main
+// import { IAvsLogic } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAvsLogic.sol";
+import { IAvsLogic } from "src/interfaces/IAvsLogic.sol";
 import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
 import { ExposedLivelinessRegistry } from "test/exposes/ExposedLivelinessRegistry.sol";
 
-contract Shared is CommonBase {
+contract Shared is CommonBase, StdCheats {
     event OperatorRegistered(address operator, string endpoint);
     event OperatorUnregistered(address operator);
     event OperatorPenalized(address operator);
@@ -16,22 +20,19 @@ contract Shared is CommonBase {
     error OperatorInAVS();
     error OperatorNotInAVS();
     error OperatorNotRegistered();
-
-    error OwnableUnauthorizedAccount(address account);
+    error Unauthorized();
 
     uint256 constant internal PENALTY_COST = 1000;
 
-    address constant internal OWNER = address(1);
-    IAttestationCenter constant internal ATTESTATION_CENTER = IAttestationCenter(address(2));
-    address constant internal OPERATOR = address(3);
-    address constant internal OUTSIDER = address(9999);
+    IAttestationCenter internal ATTESTATION_CENTER = IAttestationCenter(makeAddr("ATTESTATION_CENTER"));
+    address internal OPERATOR = makeAddr("OPERATOR");
+    address internal OUTSIDER = makeAddr("OUTSIDER");
     uint256 constant internal OPERATOR_INDEX = 1;
     uint256 constant internal BLOCK_NUMBER = 10;
 
     ExposedLivelinessRegistry internal registry;
 
     function _setUp() internal {
-        vm.prank(OWNER);
         registry = new ExposedLivelinessRegistry(ATTESTATION_CENTER);
     }
 }
@@ -39,10 +40,6 @@ contract Shared is CommonBase {
 contract Constructor is Test, Shared {
     function setUp() public {
         _setUp();
-    }
-
-    function test_constructor() public view {
-        assertEq(registry.owner(), OWNER);
     }
 
     function test_attestationCenter() public view {
@@ -149,7 +146,7 @@ contract Unregister is Test, Shared {
     }
 }
 
-contract PenalizeOperator is Test, Shared {
+contract AfterTaskSubmission is Test, Shared {
     function setUp() public {
         _setUp();
     }
@@ -166,19 +163,42 @@ contract PenalizeOperator is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
-        // penalize operator
         vm.expectEmit(address(registry));
         emit OperatorPenalized(OPERATOR);
-        vm.prank(OWNER);
-        registry.penalizeOperator(OPERATOR);
+        vm.prank(address(ATTESTATION_CENTER));
+        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", "", OPERATOR, 0);
+        uint256[] memory operatorIds = new uint256[](0);
+        registry.afterTaskSubmission(taskInfo, true, "", [uint256(0), uint256(0)], operatorIds);
 
         assertEq(registry.getPenalties(OPERATOR), 1);
     }
 
-    function test_unauthorizedOwner_revert() public {
-        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, OUTSIDER));
+    function test_notApproved_noPenalty() public {
+        // register operator
+        vm.mockCall(
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
+            abi.encode(OPERATOR_INDEX)
+        );
+
+        vm.roll(BLOCK_NUMBER);
+        vm.prank(OPERATOR);
+        registry.register("endpoint");
+
+        vm.prank(address(ATTESTATION_CENTER));
+        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", "", OPERATOR, 0);
+        uint256[] memory operatorIds = new uint256[](0);
+        registry.afterTaskSubmission(taskInfo, false, "", [uint256(0), uint256(0)], operatorIds);
+
+        assertEq(registry.getPenalties(OPERATOR), 0);
+    }
+
+    function test_notAttestationCenter_revert() public {
+        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", "", OPERATOR, 0);
+        uint256[] memory operatorIds = new uint256[](0);
+        vm.expectRevert(Unauthorized.selector);
         vm.prank(OUTSIDER);
-        registry.penalizeOperator(OPERATOR);
+        registry.afterTaskSubmission(taskInfo, true, "", [uint256(0), uint256(0)], operatorIds);
     }
 }
 
@@ -214,10 +234,8 @@ contract GetLivelinessScore is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
-        vm.prank(OWNER);
-        registry.penalizeOperator(OPERATOR);
-        vm.prank(OWNER);
-        registry.penalizeOperator(OPERATOR);
+        // use of helper function from exposed
+        registry.setOperatorPenalites(OPERATOR, 2);
 
         vm.roll(BLOCK_NUMBER + 20_000);
         uint256 livelinessScore = registry.getLivelinessScore(OPERATOR);
@@ -235,8 +253,8 @@ contract GetLivelinessScore is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
-        vm.prank(OWNER);
-        registry.penalizeOperator(OPERATOR);
+        // use of helper function from exposed
+        registry.setOperatorPenalites(OPERATOR, 1);
 
         vm.roll(BLOCK_NUMBER + 100);
         uint256 livelinessScore = registry.getLivelinessScore(OPERATOR);
