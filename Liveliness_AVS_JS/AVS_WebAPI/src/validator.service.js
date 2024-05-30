@@ -34,10 +34,10 @@ async function validate(proofOfTask, data) {
     return false;
   }
 
-  // data is chosenOperator.operatorAddress in order to read on-chain` 
+  // data is chosenOperator.operatorAddress in order to read on-chain
   const dataCheck = ethers.AbiCoder.defaultAbiCoder().encode(
-    ["address"],
-    [chosenOperator.operatorAddress]
+    ["address", "bool"],
+    [chosenOperator.operatorAddress, isValid]
   );
 
   console.log({ data, dataCheck })

@@ -23,8 +23,8 @@ router.post("/execute", async (req, res) => {
         console.log("Healthcheck task: ", healthcheckTask);
         const cid = await dalService.publishJSONToIpfs(healthcheckTask);
         const data = ethers.AbiCoder.defaultAbiCoder().encode( 
-            ["address"],
-            [healthcheckTask.chosenOperator.operatorAddress]
+            ["address", "bool"],
+            [healthcheckTask.chosenOperator.operatorAddress, healthcheckService.isValid]
         );
 
         await dalService.sendTask(cid, data, taskDefinitionId);
