@@ -3,7 +3,9 @@ pragma solidity ^0.8.20;
 
 import { Test, console } from "forge-std/Test.sol";
 import { CommonBase } from "forge-std/Base.sol";
-import { IAvsGovernance } from "@othentic/contracts/src/NetworkManagement/L1/interfaces/IAvsGovernance.sol";
+// comment in once interface is updated in main
+// import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
+import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
 import { ExposedLivelinessRegistry } from "test/exposes/ExposedLivelinessRegistry.sol";
 
 contract Shared is CommonBase {
@@ -20,7 +22,7 @@ contract Shared is CommonBase {
     uint256 constant internal PENALTY_COST = 1000;
 
     address constant internal OWNER = address(1);
-    IAvsGovernance constant internal AVS_GOVERNANCE = IAvsGovernance(address(2));
+    IAttestationCenter constant internal ATTESTATION_CENTER = IAttestationCenter(address(2));
     address constant internal OPERATOR = address(3);
     address constant internal OUTSIDER = address(9999);
     uint256 constant internal OPERATOR_INDEX = 1;
@@ -30,7 +32,7 @@ contract Shared is CommonBase {
 
     function _setUp() internal {
         vm.prank(OWNER);
-        registry = new ExposedLivelinessRegistry(AVS_GOVERNANCE);
+        registry = new ExposedLivelinessRegistry(ATTESTATION_CENTER);
     }
 }
 
@@ -43,8 +45,8 @@ contract Constructor is Test, Shared {
         assertEq(registry.owner(), OWNER);
     }
 
-    function test_avsGovernance() public view {
-        assertEq(address(registry.avsGovernance()), address(AVS_GOVERNANCE));
+    function test_attestationCenter() public view {
+        assertEq(address(registry.attestationCenter()), address(ATTESTATION_CENTER));
     }
 }
 
@@ -55,8 +57,8 @@ contract Register is Test, Shared {
 
     function test_simpleCase_operatorRegistered() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -74,8 +76,8 @@ contract Register is Test, Shared {
 
     function test_unauthorizedOperator_revert() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(0)
         );
 
@@ -92,8 +94,8 @@ contract Unregister is Test, Shared {
 
     function test_simpleCase_operatorUnregistered() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -102,8 +104,8 @@ contract Unregister is Test, Shared {
         registry.register("endpoint");
 
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(0)
         );
 
@@ -120,8 +122,8 @@ contract Unregister is Test, Shared {
 
     function test_unauthorizedOperator_revert() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(0)
         );
 
@@ -132,8 +134,8 @@ contract Unregister is Test, Shared {
 
     function test_stillRegisteredInAVS_revert() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -155,8 +157,8 @@ contract PenalizeOperator is Test, Shared {
     function test_simpleCase_operatorPenalized() public {
         // register operator
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -187,8 +189,8 @@ contract GetLivelinessScore is Test, Shared {
 
     function test_simpleCase_returnsScore() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -203,8 +205,8 @@ contract GetLivelinessScore is Test, Shared {
 
     function test_twoPenalties_returnsScore() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -224,8 +226,8 @@ contract GetLivelinessScore is Test, Shared {
 
     function test_penaltyGreaterThanBlocksSinceRegistration_returnsZero() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(OPERATOR_INDEX)
         );
 
@@ -243,8 +245,8 @@ contract GetLivelinessScore is Test, Shared {
 
     function test_operatorNotRegistered_revert() public {
         vm.mockCall(
-            address(AVS_GOVERNANCE), 
-            abi.encodeWithSelector(AVS_GOVERNANCE.operatorsIndexs.selector, OPERATOR),
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
             abi.encode(0)
         );
 

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.20;
 
-import { IAvsGovernance } from "@othentic/contracts/src/NetworkManagement/L1/interfaces/IAvsGovernance.sol";
+// comment in once interface is updated in main
+// import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
+import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
 import { ILivelinessRegistry } from "src/interfaces/ILivelinessRegistry.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -19,10 +21,10 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
 
     mapping(address => Registration) public registrations;
     mapping(address => uint256) internal penalties;
-    IAvsGovernance public avsGovernance;
+    IAttestationCenter public attestationCenter;
 
-    constructor(IAvsGovernance _avsGovernance) Ownable(msg.sender) {
-        avsGovernance = _avsGovernance;
+    constructor(IAttestationCenter _attestationCenter) Ownable(msg.sender) {
+        attestationCenter = _attestationCenter;
     }
 
     modifier registeredOperator(address _operator) {
@@ -35,7 +37,7 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
     }
 
     modifier onlyAvsOperator() {
-        uint256 operatorIndex = avsGovernance.operatorsIndexs(msg.sender);
+        uint256 operatorIndex = attestationCenter.operatorsIdsByAddress(msg.sender);
         if (operatorIndex == 0) {
             revert OperatorNotInAVS();
         }
@@ -58,7 +60,7 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
     }
 
     function register(string memory _endpoint) external onlyAvsOperator() {
-        uint256 operatorIndex = avsGovernance.operatorsIndexs(msg.sender);
+        uint256 operatorIndex = attestationCenter.operatorsIdsByAddress(msg.sender);
         registrations[msg.sender] = Registration(operatorIndex, block.number, _endpoint);
 
         emit OperatorRegistered(msg.sender, _endpoint);
@@ -66,7 +68,7 @@ contract LivelinessRegistry is ILivelinessRegistry, Ownable {
 
     // in order to unregister you need to also be unregisterd from AVS 
     function unregister() external registeredOperator(msg.sender) {
-        uint256 operatorIndex = avsGovernance.operatorsIndexs(msg.sender);
+        uint256 operatorIndex = attestationCenter.operatorsIdsByAddress(msg.sender);
         if (operatorIndex != 0) {
             revert OperatorInAVS();
         }
