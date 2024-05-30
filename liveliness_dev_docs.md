@@ -26,7 +26,7 @@ In this AVS, alongside needing to sign up to the AVS operators need to register 
 - [ ] Choose X amount of operators to healthcheck, not just 1
 - [ ] Handle certain complicated edge cases
 
-todo tree:
+todo tree (many of these deleted in source files because distracting):
 ```
 └─ Liveliness-AVS
    ├─ AVS_Logic
