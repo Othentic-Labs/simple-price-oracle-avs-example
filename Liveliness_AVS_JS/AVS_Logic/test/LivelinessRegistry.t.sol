@@ -25,6 +25,7 @@ contract Shared is CommonBase, StdCheats {
     uint256 constant internal PENALTY_COST = 1000;
 
     IAttestationCenter internal ATTESTATION_CENTER = IAttestationCenter(makeAddr("ATTESTATION_CENTER"));
+    address internal PERFORMER = makeAddr("PERFORMER");
     address internal OPERATOR = makeAddr("OPERATOR");
     address internal OUTSIDER = makeAddr("OUTSIDER");
     uint256 constant internal OPERATOR_INDEX = 1;
@@ -163,11 +164,12 @@ contract AfterTaskSubmission is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
+        bytes memory data = abi.encode(OPERATOR, true);
+        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
+        uint256[] memory operatorIds = new uint256[](0);
         vm.expectEmit(address(registry));
         emit OperatorPenalized(OPERATOR);
         vm.prank(address(ATTESTATION_CENTER));
-        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", "", OPERATOR, 0);
-        uint256[] memory operatorIds = new uint256[](0);
         registry.afterTaskSubmission(taskInfo, true, "", [uint256(0), uint256(0)], operatorIds);
 
         assertEq(registry.getPenalties(OPERATOR), 1);
@@ -185,10 +187,32 @@ contract AfterTaskSubmission is Test, Shared {
         vm.prank(OPERATOR);
         registry.register("endpoint");
 
-        vm.prank(address(ATTESTATION_CENTER));
-        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", "", OPERATOR, 0);
+        bytes memory data = abi.encode(OPERATOR, true);
+        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
         uint256[] memory operatorIds = new uint256[](0);
+        vm.prank(address(ATTESTATION_CENTER));
         registry.afterTaskSubmission(taskInfo, false, "", [uint256(0), uint256(0)], operatorIds);
+
+        assertEq(registry.getPenalties(OPERATOR), 0);
+    }
+
+    function test_notInvalid_noPenalty() public {
+        // register operator
+        vm.mockCall(
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
+            abi.encode(OPERATOR_INDEX)
+        );
+
+        vm.roll(BLOCK_NUMBER);
+        vm.prank(OPERATOR);
+        registry.register("endpoint");
+
+        bytes memory data = abi.encode(OPERATOR, false);
+        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
+        uint256[] memory operatorIds = new uint256[](0);
+        vm.prank(address(ATTESTATION_CENTER));
+        registry.afterTaskSubmission(taskInfo, true, "", [uint256(0), uint256(0)], operatorIds);
 
         assertEq(registry.getPenalties(OPERATOR), 0);
     }

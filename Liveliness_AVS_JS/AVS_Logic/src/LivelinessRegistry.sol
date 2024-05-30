@@ -95,9 +95,11 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
         uint256[2] calldata /* _taSignature */, 
         uint256[] calldata /* _operatorIds */
     ) external onlyAttestationCenter() {
-        if (_isApproved) {
-            penalties[_taskInfo.taskPerformer]++;
-            emit OperatorPenalized(_taskInfo.taskPerformer);
+        (address operator, bool isValid) = abi.decode(_taskInfo.data, (address, bool));
+
+        if (_isApproved && isValid) {
+            penalties[operator]++;
+            emit OperatorPenalized(operator);
         }
     }
 
