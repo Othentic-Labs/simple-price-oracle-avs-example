@@ -1,33 +1,39 @@
-const operators = [
-    {
-        operatorAddress: "0xaD9D986d612B291A64cbdce1B3f50a95B66D68D3",
-        endpoint: "http://10.8.0.2:8545",
-    },
-    {
-        operatorAddress: "0x4aBa6BC2efa0C5b5dE5382eb9895847252ed23Ed",
-        endpoint: "http://10.8.0.3:8545",
-    },
-    {
-        operatorAddress: "0x1B6dBf8213a1c6B7A18B7a97be1e0F3A171af7D2",
-        endpoint: "http://10.8.0.4:8545",
-    },
+const { ethers } = require("ethers");
+
+const ATTESTATION_CENTER_ABI = [
+    'function operators(uint) public view returns (address, uint, uint, uint8)',
+    'function numOfOperators() public view returns (uint)',
+    'function avsLogic() public view returns (address)',
+];
+
+const LIVELINESS_REGISTRY_ABI = [
+    'function registrations(address) external view returns (uint256, uint256, string)',
 ];
 
 // should use LivelinessRegistry to get all operators
-async function getOperatorsLength(blockhash) {
-    return operators.length;
+// TODO: decide if to incorporate blockhash or is it too much for an example
+async function getOperatorsLength(blockhash, { attestationCenterAddress, provider }) {
+    const attestationCenterContract = new ethers.Contract(attestationCenterAddress, ATTESTATION_CENTER_ABI, provider);
+    return await attestationCenterContract.numOfOperators();
 }
 
-async function getOperator(operatorIndex, blockhash) {
-    return operators[operatorIndex];
+async function getOperator(operatorIndex, blockhash, { attestationCenterAddress, provider } ) {
+    const attestationCenterContract = new ethers.Contract(attestationCenterAddress, ATTESTATION_CENTER_ABI, provider);
+    const [operatorAddress,] = await attestationCenterContract.operators(operatorIndex);
+    const avsLogicAddress = await attestationCenterContract.avsLogic();
+    const avsLogic = new ethers.Contract(avsLogicAddress, LIVELINESS_REGISTRY_ABI, provider);
+    const [,,endpoint] = await avsLogic.registrations(operatorAddress);
+
+    return { operatorAddress, endpoint };
 }
 
-async function getChosenOperator(blockHash) {
-    const operatorsLength = await getOperatorsLength(blockHash);
+async function getChosenOperator(blockHash, { attestationCenterAddress, provider }) {
+    const operatorsLength = await getOperatorsLength(blockHash, { attestationCenterAddress, provider });
     // NOTE: there is slight modulo bias but assumes number of operators is small enough it doesn't matter
-    // NOTE: maybe should use RANDAO instead of blockhash since miner can manipulate blockhash      
-    const chosenOperatorIndex = (blockHash % operatorsLength);
-    return await getOperator(chosenOperatorIndex, blockHash);
+    // NOTE: maybe should use RANDAO instead of blockhash since miner can manipulate blockhash
+    console.log({blockHash, operatorsLength});
+    const chosenOperatorIndex = (BigInt(blockHash) % BigInt(operatorsLength)) + 1n;
+    return await getOperator(chosenOperatorIndex, blockHash, { attestationCenterAddress, provider });
 }
 
 module.exports = {
