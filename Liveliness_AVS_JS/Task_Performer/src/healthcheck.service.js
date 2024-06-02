@@ -21,7 +21,8 @@ async function performHealthcheck() {
   const blockHash = recentBlock.hash;
   
   const chosenOperator = await dalService.getChosenOperator(
-    blockHash, 
+    blockHash,
+    blockNumber,
     {
       attestationCenterAddress, 
       provider: l2Provider

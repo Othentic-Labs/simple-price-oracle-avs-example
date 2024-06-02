@@ -12,27 +12,27 @@ const LIVELINESS_REGISTRY_ABI = [
 
 // should use LivelinessRegistry to get all operators
 // TODO: decide if to incorporate blockhash or is it too much for an example
-async function getOperatorsLength(blockhash, { attestationCenterAddress, provider }) {
+async function getOperatorsLength(blockNumber, { attestationCenterAddress, provider }) {
     const attestationCenterContract = new ethers.Contract(attestationCenterAddress, ATTESTATION_CENTER_ABI, provider);
-    return await attestationCenterContract.numOfOperators();
+    return await attestationCenterContract.numOfOperators({ blockTag: blockNumber });
 }
 
-async function getOperator(operatorIndex, blockhash, { attestationCenterAddress, provider } ) {
+async function getOperator(operatorIndex, blockNumber, { attestationCenterAddress, provider } ) {
     const attestationCenterContract = new ethers.Contract(attestationCenterAddress, ATTESTATION_CENTER_ABI, provider);
-    const [operatorAddress,] = await attestationCenterContract.operators(operatorIndex);
-    const avsLogicAddress = await attestationCenterContract.avsLogic();
+    const [operatorAddress,] = await attestationCenterContract.operators(operatorIndex, { blockTag: blockNumber });
+    const avsLogicAddress = await attestationCenterContract.avsLogic({ blockTag: blockNumber });
     const avsLogic = new ethers.Contract(avsLogicAddress, LIVELINESS_REGISTRY_ABI, provider);
-    const [,,endpoint] = await avsLogic.registrations(operatorAddress);
+    const [,,endpoint] = await avsLogic.registrations(operatorAddress, { blockTag: blockNumber });
 
     return { operatorAddress, endpoint };
 }
 
-async function getChosenOperator(blockHash, { attestationCenterAddress, provider }) {
-    const operatorsLength = await getOperatorsLength(blockHash, { attestationCenterAddress, provider });
+async function getChosenOperator(blockHash, blockNumber, { attestationCenterAddress, provider }) {
+    const operatorsLength = await getOperatorsLength(blockNumber, { attestationCenterAddress, provider });
     // NOTE: there is slight modulo bias but assumes number of operators is small enough it doesn't matter
     // NOTE: maybe should use RANDAO instead of blockhash since miner can manipulate blockhash
     const chosenOperatorIndex = (BigInt(blockHash) % BigInt(operatorsLength)) + 1n;
-    return await getOperator(chosenOperatorIndex, blockHash, { attestationCenterAddress, provider });
+    return await getOperator(chosenOperatorIndex, blockNumber, { attestationCenterAddress, provider });
 }
 
 module.exports = {

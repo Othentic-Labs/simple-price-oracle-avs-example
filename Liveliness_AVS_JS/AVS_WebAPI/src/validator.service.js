@@ -32,7 +32,7 @@ async function validate(proofOfTask, data) {
   // but number is returned as hexstring, unlinke in getBlock method which returns as number
   const blockNumber = parseInt(block.number, 16);
 
-  const chosenOperatorCheck = await dalService.getChosenOperator(blockHash, {
+  const chosenOperatorCheck = await dalService.getChosenOperator(blockHash, blockNumber, {
     attestationCenterAddress, 
     provider: l2Provider
   });
