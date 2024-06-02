@@ -10,6 +10,7 @@ dalService.init();
 healthcheckService.init();
 // this line might cause problem in docker builds, can be removed safely if needed
 util.suppressEthersJsonRpcProviderError();
+util.setupDebugConsole();
 app.listen(PORT, () => console.log("Server started on port:", PORT))
 
 setInterval(async () => {

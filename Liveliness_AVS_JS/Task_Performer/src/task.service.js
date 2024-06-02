@@ -30,7 +30,6 @@ async function performHealthcheckTask() {
             tries++;
         }
 
-        console.log("Healthcheck task: ", healthcheckTask);
         const cid = await dalService.publishJSONToIpfs(healthcheckTask);
         const data = ethers.AbiCoder.defaultAbiCoder().encode( 
             ["address", "bool"],

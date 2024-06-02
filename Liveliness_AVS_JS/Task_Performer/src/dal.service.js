@@ -39,7 +39,7 @@ async function sendTask(proofOfTask, data, taskDefinitionId) {
     try {
       const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
       const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-      console.log("API response:", response);
+      console.log("sendTask: API response:", response);
   } catch (error) {
       console.error("Error making API request:", error);
   }

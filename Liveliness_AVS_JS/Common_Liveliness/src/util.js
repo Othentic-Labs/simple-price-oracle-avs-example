@@ -20,6 +20,19 @@ function suppressEthersJsonRpcProviderError() {
   }
 }
 
+function setupDebugConsole() {
+  const previousConsoleDebug = console.debug;
+  if (process.env.DEBUG == 1) {
+    console.log("debug mode enabled");
+    console.debug = (message, ...optionalParameters) => {
+      previousConsoleDebug(message, ...optionalParameters);
+    }
+  } else {
+    console.debug = () => {};
+  }
+}
+
 module.exports = {
   suppressEthersJsonRpcProviderError,
+  setupDebugConsole,
 };

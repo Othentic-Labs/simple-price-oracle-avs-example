@@ -12,7 +12,7 @@ async function healthcheckOperator(endpoint, blockNumber, blockHash) {
     try {
       const provider = new ethers.JsonRpcProvider(endpoint);
       response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-      console.log("healthcheck API response:", response);
+      console.debug("healthcheckOperator: API response:", response);
   
       isValid = await validateHealthcheckResponse(response, { blockHash });
       if (isValid === null) {

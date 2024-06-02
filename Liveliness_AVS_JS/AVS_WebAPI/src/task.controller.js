@@ -9,8 +9,8 @@ const router = Router()
 router.post("/validate", async (req, res) => {
     var proofOfTask = req.body.proofOfTask;
     var data = req.body.data;
-    console.log(`Validate task: proof of task: ${proofOfTask}`);
-    console.log(`Validate task: data: ${data}`);
+    console.debug(`Validate task: proof of task: ${proofOfTask}`);
+    console.debug(`Validate task: data: ${data}`);
     try {
         const result = await validatorService.validate(proofOfTask, data);
         console.log('Vote:', result ? 'Approve' : 'Not Approved');

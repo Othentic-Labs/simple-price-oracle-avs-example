@@ -30,7 +30,6 @@ async function validate(proofOfTask, data) {
     params: [blockHash, false]
   };
   const block = await l2Provider.send(getBlockByHashRequest.method, getBlockByHashRequest.params);
-  // console.log("Block from eth_getBlockByHash: ", block);
   // ethers getBlock doesn't work with blockhash so need to use specific RPC method,
   // but number is returned as hexstring, unlinke in getBlock method which returns as number
   const blockNumber = parseInt(block.number, 16);
@@ -45,6 +44,7 @@ async function validate(proofOfTask, data) {
     provider: l2Provider
   });
 
+  console.debug("chosenOperator comparison: ", { chosenOperator, chosenOperatorCheck });
   if (chosenOperator.operatorAddress !== chosenOperatorCheck.operatorAddress || chosenOperator.endpoint !== chosenOperatorCheck.endpoint) {
     console.log("Chosen operator is different from chosen operator in task");
     return false;
@@ -56,14 +56,14 @@ async function validate(proofOfTask, data) {
     [chosenOperator.operatorAddress, isValid]
   );
 
-  console.log({ data, dataCheck })
+  console.debug("data comparison: ", { data, dataCheck })
   if (data !== dataCheck) {
     console.log("Data field is different from chosen operator address");
     return false;
   }
 
   if (isValid) {
-    console.log("isValid is true, validating response with: ", { response, blockHash });
+    console.debug("isValid is true, validating response with: ", { response, blockHash });
     const isValidCheck = await healthcheckService.validateHealthcheckResponse(response, { blockHash });
     if (!isValidCheck) {
       console.log("Response is invalid");
@@ -71,13 +71,13 @@ async function validate(proofOfTask, data) {
     }
     
     const isChosenOperatorCorrect = chosenOperator.operatorAddress === response.address;
-    console.log("chosen operator check: ", { isChosenOperatorCorrect, chosenOperator, response });
+    console.debug("chosen operator check: ", { isChosenOperatorCorrect, chosenOperator, response });
     if (!isChosenOperatorCorrect) {
       console.log("Chosen operator is incorrect");
       return false;
     }
   } else {
-    console.log("isValid is false, performing healthcheck on operator: ", { chosenOperator, blockNumber, blockHash});
+    console.debug("isValid is false, performing healthcheck on operator: ", { chosenOperator, blockNumber, blockHash});
     const { isValid: isValidCheck } = await healthcheckService.healthcheckOperator(chosenOperator.endpoint, blockNumber, blockHash);
     if (isValidCheck === null) {
       throw new Error("Error performing healthcheck on operator: ", chosenOperator);
