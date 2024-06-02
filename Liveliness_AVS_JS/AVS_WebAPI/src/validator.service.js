@@ -13,6 +13,9 @@ function init() {
   attestationCenterAddress = process.env.ATTESTATION_CENTER_ADDRESS;
 }
 
+/**
+ * return true if task was performed correctly, false otherwise
+ */
 async function validate(proofOfTask, data) {
   const l2Provider = new ethers.JsonRpcProvider(l2Rpc);
   const latestBlocknumber = await l2Provider.getBlockNumber();

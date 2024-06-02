@@ -1,5 +1,12 @@
 const { ethers } = require("ethers");
 
+/**
+ * This file contains shared healthcheck functionalitiy for both performer and operators.
+ */
+
+/**
+ * sends health check request and also validates it using validateHealthcheckResponse
+ */
 async function healthcheckOperator(endpoint, blockNumber, blockHash) {
     let response = null;
     let isValid = false;
@@ -27,6 +34,9 @@ async function healthcheckOperator(endpoint, blockNumber, blockHash) {
     return { response, isValid: true };
   }
 
+/**
+ * returns whether the healthcheck response indicates of a healthy operator
+ */
 async function validateHealthcheckResponse(response, { blockHash }) {
   try {
     // 1. Verify that blockhash in response is the blockhash of blocknumber that was sent

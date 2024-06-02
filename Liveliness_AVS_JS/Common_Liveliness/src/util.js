@@ -20,6 +20,9 @@ function suppressEthersJsonRpcProviderError() {
   }
 }
 
+// console.debug isn't actually a debug level log, it's an alias
+// to console.log. This function replaces console.debug with a dummy function
+// to supress debug logs.
 function setupDebugConsole() {
   const previousConsoleDebug = console.debug;
   if (process.env.DEBUG == 1) {

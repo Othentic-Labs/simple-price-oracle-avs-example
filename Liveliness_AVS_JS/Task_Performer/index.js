@@ -6,6 +6,8 @@ const healthcheckService = require("./src/healthcheck.service");
 const taskService = require("./src/task.service");
 const util = require("common_liveliness").util;
 
+const HEALTHCHECK_TASK_INTERVAL = 20000;
+
 dalService.init();
 healthcheckService.init();
 // this line might cause problem in docker builds, can be removed safely if needed
@@ -14,6 +16,6 @@ util.setupDebugConsole();
 app.listen(PORT, () => console.log("Server started on port:", PORT))
 
 setInterval(async () => {
-    console.log("starting healthcheck task: ");
-    await taskService.performHealthcheckTask();
-}, 20000);
+  console.log("starting healthcheck task: ");
+  await taskService.performHealthcheckTask();
+}, HEALTHCHECK_TASK_INTERVAL);

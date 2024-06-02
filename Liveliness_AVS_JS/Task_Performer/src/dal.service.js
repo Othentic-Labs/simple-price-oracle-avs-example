@@ -1,12 +1,13 @@
 require('dotenv').config();
 const pinataSDK = require("@pinata/sdk");
 const { ethers } = require('ethers');
+// this dalService is common DAL functionallity that is shared between Task Performer and AVS JS
 const { dalService } = require('common_liveliness');
 
-var pinataApiKey='';
-var pinataSecretApiKey='';
-var rpcBaseAddress='';
-var privateKey='';
+let pinataApiKey='';
+let pinataSecretApiKey='';
+let rpcBaseAddress='';
+let privateKey='';
 
 function init() {
   pinataApiKey = process.env.PINATA_API_KEY;
@@ -16,11 +17,9 @@ function init() {
 }
 
 async function sendTask(proofOfTask, data, taskDefinitionId) {
+  let wallet = new ethers.Wallet(privateKey);
+  let performerAddress = wallet.address;
 
-  var wallet = new ethers.Wallet(privateKey);
-  var performerAddress = wallet.address;
-
-  // data = ethers.hexlify(ethers.toUtf8Bytes(data));
   const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "bytes", "address", "uint16"], [proofOfTask, data, performerAddress, taskDefinitionId]);
   const messageHash = ethers.keccak256(message);
   const sig = wallet.signingKey.sign(messageHash).serialized;

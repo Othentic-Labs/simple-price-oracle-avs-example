@@ -4,9 +4,9 @@ const { ethers } = require('ethers');
 const dalService = require('./dal.service');
 const { healthcheckService } = require('common_liveliness');
 
-var rpcBaseAddress='';
-var l2Rpc='';
-var attestationCenterAddress='';
+let rpcBaseAddress='';
+let l2Rpc='';
+let attestationCenterAddress='';
 
 function init() {
   rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;

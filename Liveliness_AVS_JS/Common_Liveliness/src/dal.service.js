@@ -10,8 +10,6 @@ const LIVELINESS_REGISTRY_ABI = [
     'function registrations(address) external view returns (uint256, uint256, string)',
 ];
 
-// should use LivelinessRegistry to get all operators
-// TODO: decide if to incorporate blockhash or is it too much for an example
 async function getOperatorsLength(blockNumber, { attestationCenterAddress, provider }) {
     const attestationCenterContract = new ethers.Contract(attestationCenterAddress, ATTESTATION_CENTER_ABI, provider);
     return await attestationCenterContract.numOfOperators({ blockTag: blockNumber });

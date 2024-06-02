@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require("axios");
+// this dalService is common DAL functionallity that is shared between Task Performer and AVS JS
 const { dalService } = require('common_liveliness');
 
 let ipfsHost='';
