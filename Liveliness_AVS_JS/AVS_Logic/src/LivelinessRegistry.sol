@@ -33,6 +33,15 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
         _;
     }
 
+    modifier unregisteredOperator(address _operator) {
+        Registration memory registration = registrations[_operator];
+        if (registration.operatorIndex != 0) {
+            revert OperatorIsRegistered();
+        }
+
+        _;
+    }
+
     modifier onlyAvsOperator() {
         uint256 operatorIndex = attestationCenter.operatorsIdsByAddress(msg.sender);
         if (operatorIndex == 0) {
@@ -63,7 +72,7 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
         }
     }
 
-    function register(string memory _endpoint) external onlyAvsOperator() {
+    function register(string memory _endpoint) external unregisteredOperator(msg.sender) onlyAvsOperator() {
         uint256 operatorIndex = attestationCenter.operatorsIdsByAddress(msg.sender);
         registrations[msg.sender] = Registration(operatorIndex, block.number, _endpoint);
 
@@ -80,6 +89,11 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
         // NOTE: Might make sense to simply switch a flag in order to save gas
         delete registrations[msg.sender];
         emit OperatorUnregistered(msg.sender);
+    }
+
+    function changeEndpoint(string memory _endpoint) external registeredOperator(msg.sender) {
+        registrations[msg.sender].endpoint = _endpoint;
+        emit OperatorChangedEndpoint(msg.sender, _endpoint);
     }
 
     function afterTaskSubmission(

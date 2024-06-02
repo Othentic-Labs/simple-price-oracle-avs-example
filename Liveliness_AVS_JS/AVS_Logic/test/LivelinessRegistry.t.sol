@@ -11,10 +11,12 @@ import { ExposedLivelinessRegistry } from "test/exposes/ExposedLivelinessRegistr
 contract Shared is CommonBase, StdCheats {
     event OperatorRegistered(address operator, string endpoint);
     event OperatorUnregistered(address operator);
+    event OperatorChangedEndpoint(address operator, string endpoint);
     event OperatorPenalized(address operator);
 
     error OperatorInAVS();
     error OperatorNotInAVS();
+    error OperatorIsRegistered();
     error OperatorNotRegistered();
     error Unauthorized();
 
@@ -76,6 +78,22 @@ contract Register is Test, Shared {
         );
 
         vm.expectRevert(OperatorNotInAVS.selector);
+        vm.prank(OPERATOR);
+        registry.register("endpoint");
+    }
+
+    function test_registerTwice_revert() public {
+        vm.mockCall(
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
+            abi.encode(OPERATOR_INDEX)
+        );
+
+        vm.roll(BLOCK_NUMBER);
+        vm.prank(OPERATOR);
+        registry.register("endpoint");
+
+        vm.expectRevert(OperatorIsRegistered.selector);
         vm.prank(OPERATOR);
         registry.register("endpoint");
     }
@@ -141,6 +159,40 @@ contract Unregister is Test, Shared {
         vm.prank(OPERATOR);
         registry.unregister();    
     }
+}
+
+contract ChangeEndpoint is Test, Shared {
+    function setUp() public {
+        _setUp();
+    }
+
+    function test_simpleCase_endpointChanged() public {
+        vm.mockCall(
+            address(ATTESTATION_CENTER), 
+            abi.encodeWithSelector(ATTESTATION_CENTER.operatorsIdsByAddress.selector, OPERATOR),
+            abi.encode(OPERATOR_INDEX)
+        );
+
+        vm.roll(BLOCK_NUMBER);
+        vm.prank(OPERATOR);
+        registry.register("endpoint");
+
+        vm.expectEmit(address(registry));
+        emit OperatorChangedEndpoint(OPERATOR, "newEndpoint");
+        vm.prank(OPERATOR);
+        registry.changeEndpoint("newEndpoint");
+
+        (uint256 operatorIndex, uint256 blockNumber, string memory endpoint) = registry.registrations(OPERATOR);
+        assertEq(operatorIndex, OPERATOR_INDEX);
+        assertEq(blockNumber, BLOCK_NUMBER);
+        assertEq(endpoint, "newEndpoint");
+    }
+
+    function test_operatorNotRegistered_revert() public {
+        vm.expectRevert(OperatorNotRegistered.selector);
+        vm.prank(OUTSIDER);
+        registry.changeEndpoint("newEndpoint");
+    }   
 }
 
 contract AfterTaskSubmission is Test, Shared {
