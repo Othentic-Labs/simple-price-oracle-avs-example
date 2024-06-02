@@ -3,6 +3,8 @@ const dalService = require("./dal.service");
 const { healthcheckService } = require("common_liveliness");
 const { ethers } = require('ethers');
 
+const MAX_BLOCKS_PASSED = 5;
+
 let l2Rpc;
 let attestationCenterAddress;
 
@@ -13,6 +15,7 @@ function init() {
 
 async function validate(proofOfTask, data) {
   const l2Provider = new ethers.JsonRpcProvider(l2Rpc);
+  const latestBlocknumber = await l2Provider.getBlockNumber();
   const taskResult = await dalService.getIPfsTask(proofOfTask);
 
   if (taskResult === null) {
@@ -31,6 +34,11 @@ async function validate(proofOfTask, data) {
   // ethers getBlock doesn't work with blockhash so need to use specific RPC method,
   // but number is returned as hexstring, unlinke in getBlock method which returns as number
   const blockNumber = parseInt(block.number, 16);
+
+  if (latestBlocknumber - blockNumber > MAX_BLOCKS_PASSED) {
+    console.log("Block is too old");
+    return false;
+  }
 
   const chosenOperatorCheck = await dalService.getChosenOperator(blockHash, blockNumber, {
     attestationCenterAddress, 
