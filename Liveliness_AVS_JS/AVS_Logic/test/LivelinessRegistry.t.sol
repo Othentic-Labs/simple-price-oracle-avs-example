@@ -4,12 +4,8 @@ pragma solidity ^0.8.20;
 import { Test, console } from "forge-std/Test.sol";
 import { CommonBase } from "forge-std/Base.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
-// comment in once interface is updated in main
-// import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
-// comment in once interface is updated in main
-// import { IAvsLogic } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAvsLogic.sol";
-import { IAvsLogic } from "src/interfaces/IAvsLogic.sol";
-import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
+import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
+import { IAvsLogic } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAvsLogic.sol";
 import { ExposedLivelinessRegistry } from "test/exposes/ExposedLivelinessRegistry.sol";
 
 contract Shared is CommonBase, StdCheats {
@@ -165,7 +161,7 @@ contract AfterTaskSubmission is Test, Shared {
         registry.register("endpoint");
 
         bytes memory data = abi.encode(OPERATOR, false);
-        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
+        IAttestationCenter.TaskInfo memory taskInfo = IAttestationCenter.TaskInfo("", data, PERFORMER, 0);
         uint256[] memory operatorIds = new uint256[](0);
         vm.expectEmit(address(registry));
         emit OperatorPenalized(OPERATOR);
@@ -188,7 +184,7 @@ contract AfterTaskSubmission is Test, Shared {
         registry.register("endpoint");
 
         bytes memory data = abi.encode(OPERATOR, true);
-        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
+        IAttestationCenter.TaskInfo memory taskInfo = IAttestationCenter.TaskInfo("", data, PERFORMER, 0);
         uint256[] memory operatorIds = new uint256[](0);
         vm.prank(address(ATTESTATION_CENTER));
         registry.afterTaskSubmission(taskInfo, false, "", [uint256(0), uint256(0)], operatorIds);
@@ -209,7 +205,7 @@ contract AfterTaskSubmission is Test, Shared {
         registry.register("endpoint");
 
         bytes memory data = abi.encode(OPERATOR, true);
-        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", data, PERFORMER, 0);
+        IAttestationCenter.TaskInfo memory taskInfo = IAttestationCenter.TaskInfo("", data, PERFORMER, 0);
         uint256[] memory operatorIds = new uint256[](0);
         vm.prank(address(ATTESTATION_CENTER));
         registry.afterTaskSubmission(taskInfo, true, "", [uint256(0), uint256(0)], operatorIds);
@@ -218,7 +214,7 @@ contract AfterTaskSubmission is Test, Shared {
     }
 
     function test_notAttestationCenter_revert() public {
-        IAvsLogic.TaskInfo memory taskInfo = IAvsLogic.TaskInfo("", "", OPERATOR, 0);
+        IAttestationCenter.TaskInfo memory taskInfo = IAttestationCenter.TaskInfo("", "", OPERATOR, 0);
         uint256[] memory operatorIds = new uint256[](0);
         vm.expectRevert(Unauthorized.selector);
         vm.prank(OUTSIDER);

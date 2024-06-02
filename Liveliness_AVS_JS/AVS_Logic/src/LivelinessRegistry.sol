@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.20;
 
-// comment in once interface is updated in main
-// import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
-// comment in once interface is updated in main
-// import { IAvsLogic } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAvsLogic.sol";
-import { IAvsLogic } from "src/interfaces/IAvsLogic.sol";
-import { IAttestationCenter } from "src/interfaces/IAttestationCenter.sol";
+import { IAttestationCenter } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAttestationCenter.sol";
+import { IAvsLogic } from "@othentic/contracts/src/NetworkManagement/L2/interfaces/IAvsLogic.sol";
 import { ILivelinessRegistry } from "src/interfaces/ILivelinessRegistry.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -87,7 +83,7 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
     }
 
     function afterTaskSubmission(
-        TaskInfo calldata _taskInfo, 
+        IAttestationCenter.TaskInfo calldata _taskInfo, 
         bool _isApproved, 
         bytes calldata /* _tpSignature */, 
         uint256[2] calldata /* _taSignature */, 
@@ -102,7 +98,7 @@ contract LivelinessRegistry is ILivelinessRegistry, IAvsLogic {
     }
 
     function beforeTaskSubmission(
-        TaskInfo calldata /* _taskInfo */, 
+        IAttestationCenter.TaskInfo calldata /* _taskInfo */, 
         bool /* _isApproved */, 
         bytes calldata /* _tpSignature */, 
         uint256[2] calldata /* _taSignature */, 
