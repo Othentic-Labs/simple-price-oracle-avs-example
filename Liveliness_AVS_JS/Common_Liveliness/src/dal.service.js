@@ -1,7 +1,7 @@
 const { ethers } = require("ethers");
 
 const ATTESTATION_CENTER_ABI = [
-    'function operators(uint) public view returns (address, uint, uint, uint8)',
+    'function getOperatorPaymentDetail(uint) public view returns (address, uint, uint, uint8)',
     'function numOfOperators() public view returns (uint)',
     'function avsLogic() public view returns (address)',
 ];
@@ -17,7 +17,7 @@ async function getOperatorsLength(blockNumber, { attestationCenterAddress, provi
 
 async function getOperator(operatorIndex, blockNumber, { attestationCenterAddress, provider } ) {
     const attestationCenterContract = new ethers.Contract(attestationCenterAddress, ATTESTATION_CENTER_ABI, provider);
-    const [operatorAddress,] = await attestationCenterContract.operators(operatorIndex, { blockTag: blockNumber });
+    const [operatorAddress,] = await attestationCenterContract.getOperatorPaymentDetail(operatorIndex, { blockTag: blockNumber });
     const avsLogicAddress = await attestationCenterContract.avsLogic({ blockTag: blockNumber });
     const avsLogic = new ethers.Contract(avsLogicAddress, LIVELINESS_REGISTRY_ABI, provider);
     const [,,endpoint] = await avsLogic.registrations(operatorAddress, { blockTag: blockNumber });
