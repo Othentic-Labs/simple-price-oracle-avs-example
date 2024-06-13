@@ -9,6 +9,8 @@ services:
   aggregator:
     <<: *othentic-cli
     command: ["node", "aggregator", "--json-rpc"]
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY:-${PRIVATE_KEY_AGGREGATOR:-}}
     ports:
       - "8545:8545"
       - "9876:9876"
@@ -25,7 +27,8 @@ services:
       "http://10.8.0.42",
     ]
     environment:
-      - PRIVATE_KEY=${PRIVATE_KEY_VALIDATOR1}
+      - PRIVATE_KEY=${PRIVATE_KEY_VALIDATOR1:-${PRIVATE_KEY_ATTESTER1:-}}
+      - TASK_PERFORMER=${OTHENTIC_REGISTRY_ADDRESS}
     depends_on:
       aggregator:
         condition: service_started
@@ -42,7 +45,8 @@ services:
       "http://10.8.0.42",
     ]
     environment:
-      - PRIVATE_KEY=${PRIVATE_KEY_VALIDATOR2}
+      - PRIVATE_KEY=${PRIVATE_KEY_VALIDATOR2:-${PRIVATE_KEY_ATTESTER2:-}}
+      - TASK_PERFORMER=${OTHENTIC_REGISTRY_ADDRESS}
     depends_on:
       aggregator:
         condition: service_started
@@ -59,7 +63,8 @@ services:
       "http://10.8.0.42",
     ]
     environment:
-      - PRIVATE_KEY=${PRIVATE_KEY_VALIDATOR3}
+      - PRIVATE_KEY=${PRIVATE_KEY_VALIDATOR3:-${PRIVATE_KEY_ATTESTER3:-}}
+      - TASK_PERFORMER=${OTHENTIC_REGISTRY_ADDRESS}
     depends_on:
       aggregator:
         condition: service_started
@@ -81,6 +86,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
+      - PRIVATE_KEY=${PRIVATE_KEY:-${PRIVATE_KEY_PERFORMER:-}}
     env_file:
       - .env
     ports:
