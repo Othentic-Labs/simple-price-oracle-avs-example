@@ -4,7 +4,6 @@
 
 # node
 if [ "$1" = "node" ]; then
-    # change ip onces there is a bootstrap.othentic.xyz
     othentic-cli node attester "/ip4/${OTHENTIC_BOOTSTRAP_IP}/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}" --avs-webapi "http://${AVS_WEBAPI}" --json-rpc
 fi
 
