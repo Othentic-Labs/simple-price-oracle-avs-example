@@ -1,0 +1,29 @@
+FROM node:18
+
+# NOTICE!!!
+# Run from root directory of the project, not from Operator_Onboarding directory
+
+RUN npm install -g npm@10.5.0
+
+ARG NPM_TOKEN=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
+
+# Install CLI
+RUN echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > $HOME/.npmrc
+
+RUN npm i -g @othentic/othentic-cli
+
+# Copy AVS WebAPI
+COPY Price_Oracle_AVS_JS/AVS_WebAPI /app/AVS_WebAPI
+
+WORKDIR /app/AVS_WebAPI
+
+RUN npm install
+
+WORKDIR /app
+
+# Copy entrypoint script
+COPY Operator_Onboarding/entrypoint-operator.sh /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/entrypoint-operator.sh
+
+ENTRYPOINT [ "entrypoint-operator.sh" ]

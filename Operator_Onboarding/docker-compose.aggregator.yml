@@ -1,0 +1,38 @@
+# Needs to be ran from root directory of the project
+
+version: '3.7'
+services:
+  aggregator:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: ./Dockerfile.aggregator
+    command: ["node", "aggregator", "--json-rpc"]
+    ports:
+      - "8545:8545"
+      - "9876:9876"
+    networks:
+      p2p:
+        ipv4_address: ${OTHENTIC_BOOTSTRAP_IP}
+  task-performer:
+    env_file:
+      - .env
+    build:
+      context: ../Price_Oracle_AVS_JS/Task_Performer
+      dockerfile: ./Dockerfile
+    environment:
+      - OTHENTIC_CLIENT_RPC_ADDRESS=http://${OTHENTIC_BOOTSTRAP_IP}:8545
+    ports:
+      - "4003:4003"
+    networks:
+      - p2p
+
+networks:
+  p2p:
+    external: true
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.8.0.0/16
+        - gateway: 10.8.0.1
