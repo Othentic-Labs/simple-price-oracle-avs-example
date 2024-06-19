@@ -23,6 +23,6 @@ OPERATOR_CONTAINER_NAME="AVS_Operator_${IDENTIFIER}"
 # docker start $AVS_WEBAPI_CONTAINER_NAME || docker run --name $AVS_WEBAPI_CONTAINER_NAME -d $IMAGE_NAME --network p2p
 # When running multiple AVS operators on the same machine, boot only one instance of AVS WebAPI
 docker start $AVS_WEBAPI_CONTAINER_NAME 2>/dev/null || docker run --name $AVS_WEBAPI_CONTAINER_NAME --env-file .env --network p2p --ip $AVS_WEBAPI -d $IMAGE_NAME avs-webapi || exit 1
-docker start $OPERATOR_CONTAINER_NAME 2>/dev/null || docker run --name $OPERATOR_CONTAINER_NAME --env-file .env --network p2p -d $IMAGE_NAME node $1 || exit 1
+docker start $OPERATOR_CONTAINER_NAME 2>/dev/null || docker run --name $OPERATOR_CONTAINER_NAME --env-file .env -e PRIVATE_KEY=$1 --network p2p -d $IMAGE_NAME node $1 || exit 1
 
 echo "Operator container is running with name $OPERATOR_CONTAINER_NAME"
