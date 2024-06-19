@@ -5,6 +5,9 @@ services:
   aggregator:
     env_file:
       - .env
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR:-${PRIVATE_KEY:-}}
+      - TASK_PERFORMER=0x0000000000000000000000000000000000000000
     build:
       context: .
       dockerfile: ./Dockerfile.aggregator
@@ -23,6 +26,8 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - OTHENTIC_CLIENT_RPC_ADDRESS=http://${OTHENTIC_BOOTSTRAP_IP}:8545
+      - PRIVATE_KEY=${PRIVATE_KEY_PERFORMER:-${PRIVATE_KEY:-}}
+      - TASK_PERFORMER=0x0000000000000000000000000000000000000000
     ports:
       - "4003:4003"
     networks:
