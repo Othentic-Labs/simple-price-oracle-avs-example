@@ -73,7 +73,7 @@ services:
         ipv4_address: 10.8.0.4
   avs-webapi:
     build:
-      context: ./Price_Oracle_AVS_JS/AVS_WebAPI
+      context: ./AVS_WebAPI
       dockerfile: ./Dockerfile
     env_file:
       - .env
@@ -82,7 +82,7 @@ services:
         ipv4_address: 10.8.0.42
   task-performer:
     build:
-      context: ./Price_Oracle_AVS_JS/Task_Performer
+      context: ./Task_Performer
       dockerfile: ./Dockerfile
     environment:
       - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
