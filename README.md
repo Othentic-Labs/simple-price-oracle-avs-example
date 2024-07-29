@@ -1,12 +1,12 @@
 # 🍀 Othentic AVS Samples
 
-# Set Up
+# ⚙️ Set Up
 
 To set up the environment, create a `.env` file with the usual Othentic
 configurations (see the `.env.example`).
 
 
-# Install the Othentic CLI 
+# ✈️ Install the Othentic CLI 
 Installing Othentic CLI with `npm`:
 
 ```console
@@ -18,7 +18,7 @@ Verify installation by the command:
 ```console
 othentic-cli -h
 ```
-# Prerequisites
+# 🧰 Prerequisites
 You need to register 3 self-deploy Operators with a minimum of 0.01 stETH.
 
 * Deployer account:
@@ -28,7 +28,7 @@ You need to register 3 self-deploy Operators with a minimum of 0.01 stETH.
    * A minimum of 0.02 holETH on Holesky
 * ERC-20 token address
 
-# Contracts Deployment
+# 📑 Contracts Deployment
 To deploy the AVS’s on-chain components, run the following command:
 
 ``` console
@@ -39,14 +39,14 @@ othentic-cli network deploy \\
     --name test-avs-name
 ```
 
-# Operators Setup
+# 🏋️‍♂️ Operators Setup
 
 Register as an operator for both EigenLayer and the AVS
 ``` console
 othentic-cli operator register
 ```
 
-# Convert ETH into stETH [Optional]
+# 🔁 Convert ETH into stETH [Optional]
 This command converts 0.012 ETH into stETH before depositing it into EigenLayer pool:
 
 ``` console
@@ -83,7 +83,7 @@ docker-compose up --build
 > This might take a few minutes when building the images
 
 
-# Executing a task
+# 🚀 Executing a task
 To execute a task we send a 
 POST request to the Task Performer service:
 
