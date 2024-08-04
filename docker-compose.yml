@@ -71,6 +71,31 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.4
+  set-syncer:
+    env_file:
+      - .env
+    build:
+      context: ./Set_Syncer
+      dockerfile: Dockerfile
+    profiles: [set-syncer]
+  syncer:
+    <<: *othentic-cli
+    command: [
+      "node",
+      "sync",
+      "--sync-interval",
+      "12h",
+    ]
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY_SYNCER}
+      - ATTESTATION_CENTER_ADDRESS=${ATTESTATION_CENTER_ADDRESS}
+      - AVS_GOVERNANCE_ADDRESS=${AVS_GOVERNANCE_ADDRESS}
+    depends_on:
+      set-syncer:
+        condition: service_completed_successfully
+    networks:
+      p2p:
+        ipv4_address: 10.8.0.6
   avs-webapi:
     build:
       context: ./AVS_WebAPI
