@@ -72,6 +72,7 @@ services:
 - 3 Attester nodes
 - AVS WebAPI endpoint
 - TaskPerformer endpoint
+- Sync Shares of operators across layers
 
 
 run:
@@ -113,3 +114,6 @@ implement their own validation logic.
 ```
 POST task/validate returns (bool) {"proofOfTask": "{proofOfTask}"};
 ```
+
+### Sync Shares
+sync the shares of operators between L1 and L2 at a fixed interval. The default interval is 12h and can be modified inside the docker-compose file
