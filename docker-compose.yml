@@ -77,7 +77,6 @@ services:
     build:
       context: ./Set_Syncer
       dockerfile: Dockerfile
-    profiles: [set-syncer]
   syncer:
     <<: *othentic-cli
     command: [
