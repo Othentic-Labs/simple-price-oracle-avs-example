@@ -12,11 +12,11 @@ RUN echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > $HOME/.npmrc
 
 RUN npm i -g @othentic/othentic-cli
 
-ADD index.js ./
+ADD ./Set_Syncer/index.js ./
 
 ADD .env ./
 
-ADD package*.json ./
+ADD ./Set_Syncer/package*.json ./
 
 RUN npm ci
 

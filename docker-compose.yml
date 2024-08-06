@@ -75,8 +75,8 @@ services:
     env_file:
       - .env
     build:
-      context: ./Set_Syncer
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Set_Syncer/Dockerfile
   syncer:
     <<: *othentic-cli
     command: [
