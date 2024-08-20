@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:22
 
 RUN npm install -g npm@10.5.0
 
