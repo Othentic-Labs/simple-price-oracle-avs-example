@@ -1,5 +1,5 @@
 {
-  "name": "avs_server",
+  "name": "validation_service",
   "version": "1.0.0",
   "description": "",
   "module": "ESModule",
