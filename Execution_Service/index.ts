@@ -9,7 +9,6 @@ import {
     BlobStatusReply, 
     RetrieveBlobRequest, 
     RetrieveBlobReply,
-    BlobStatus
 } from './eigenDA/bindings/disperser/disperser_pb';
 import { exit } from 'process';
 
