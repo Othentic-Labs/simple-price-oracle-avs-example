@@ -38,15 +38,29 @@ function decodeFromBN254FieldElements(inputBuffer: Buffer): Buffer {
     return Buffer.concat(outputBuffers);
 }
 
-function main() {
-    const inputBuffer = Buffer.from('hello othentic', 'utf-8');
+// gets a json object
+function encode(data: any): string {
+    const inputBuffer = Buffer.from(JSON.stringify(data), 'utf-8');
     const outputBuffer = encodeToBN254FieldElements(inputBuffer);
-    console.log(outputBuffer.toString('base64'));
-    const reverse = decodeFromBN254FieldElements(outputBuffer);
-    console.log(reverse.toString('utf-8'));
+    return outputBuffer.toString('base64');
 }
 
-// AGhlbGxvYXNqaGZiZ3NkaGp2c2RoZnZzZGFqaGRmZ2EAc3ZmamhnYWR2ZmpoYWdkdmZhaGpnc3ZkZ2hqYWRmdgBoamdhZnZzYWdoZGZhc2Q=
-// AGhlbGxvYXNqaGZiZ3NkaGp2c2RoZnZzZGFqaGRmZ2EAc3ZmamhnYWR2ZmpoYWdkdmZhaGpnc3ZkZ2hqYWRmdgBoamdhZnZzYWdoZGZhc2Q=
+function decode(data: string): any {
+    const inputBuffer = Buffer.from(data, 'base64');
+    const outputBuffer = decodeFromBN254FieldElements(inputBuffer);
+    return JSON.parse(outputBuffer.toString('utf-8'));
+}
 
+function main() {
+    const data = {
+        name: "Alice",
+        age: 30,
+        city: "New York"
+    }
+
+    const encoded = encode(data);
+    const decoded = decode(encoded);
+
+    console.log({encoded, decoded: JSON.stringify(decoded)});
+}
 main();
