@@ -1,9 +1,66 @@
 import * as grpc from 'grpc';
- 
-import { DisperserClient } from './disperser/disperser_grpc_pb';
-import { DisperseBlobRequest, DisperseBlobReply, BlobStatusRequest, BlobStatusReply, RetrieveBlobRequest, RetrieveBlobReply } from './disperser/disperser_pb';
+import * as readline from 'readline'; 
+
+import { DisperserClient } from './eigenDA/bindings/disperser/disperser_grpc_pb';
+import { 
+    DisperseBlobRequest, 
+    DisperseBlobReply, 
+    BlobStatusRequest, 
+    BlobStatusReply, 
+    RetrieveBlobRequest, 
+    RetrieveBlobReply,
+    BlobStatus
+} from './eigenDA/bindings/disperser/disperser_pb';
+import { exit } from 'process';
 
 const EIGEN_ENDPOINT = 'disperser-holesky.eigenda.xyz:443';
+
+async function disperseBlobRoutine(data: any) {
+    const client = new DisperserClient(EIGEN_ENDPOINT, grpc.credentials.createSsl());
+
+    const encoded = encode(data);
+    const request = new DisperseBlobRequest();
+    request.setData(encoded);
+    const response = await disperseBlob(client, request);
+    console.log(response.toObject());
+}
+
+async function getBlobRoutine(requestId: string) {
+    const client = new DisperserClient(EIGEN_ENDPOINT, grpc.credentials.createSsl());
+    const statusRequest = new BlobStatusRequest();
+    statusRequest.setRequestId(requestId);
+    const statusResponse = await getBlobStatus(client, statusRequest);
+    const blobIndex = statusResponse.getInfo()?.getBlobVerificationProof()?.getBlobIndex();
+    const batchHeaderHash = statusResponse.getInfo()?.getBlobVerificationProof()?.getBatchMetadata()?.getBatchHeaderHash();
+
+    if (!blobIndex || !batchHeaderHash) {
+        console.log('Blob dispersal is still in progress. Blob status:');
+        console.log(statusResponse.toObject());
+        return;
+    }
+
+    const retrieveRequest = new RetrieveBlobRequest();
+    retrieveRequest.setBlobIndex(blobIndex);
+    retrieveRequest.setBatchHeaderHash(batchHeaderHash);
+    const response = await retrieveBlob(client, retrieveRequest);
+    console.log('Retrieved blob:');
+    console.log(response.toObject());
+    const data = Buffer.from(response.getData()).toString('utf-8');
+    console.log('Decoded data:');
+    console.log(data);
+}
+
+function encode(data: any): string {
+    const inputBuffer = Buffer.from(JSON.stringify(data), 'utf-8');
+    const outputBuffer = encodeToBN254FieldElements(inputBuffer);
+    return outputBuffer.toString('base64');
+}
+
+function decode(data: string): any {
+    const inputBuffer = Buffer.from(data, 'base64');
+    const outputBuffer = decodeFromBN254FieldElements(inputBuffer);
+    return JSON.parse(outputBuffer.toString('utf-8'));
+}
 
 function encodeToBN254FieldElements(inputBuffer: Buffer): Buffer {
     const nullByte = Buffer.from([0x00]);
@@ -39,12 +96,6 @@ function decodeFromBN254FieldElements(inputBuffer: Buffer): Buffer {
   
     // Concatenate all chunks into a single output buffer
     return Buffer.concat(outputBuffers);
-}
-
-function encode(data: any): string {
-    const inputBuffer = Buffer.from(JSON.stringify(data), 'utf-8');
-    const outputBuffer = encodeToBN254FieldElements(inputBuffer);
-    return outputBuffer.toString('base64');
 }
 
 function disperseBlob(client: DisperserClient, request: DisperseBlobRequest): Promise<DisperseBlobReply> {
@@ -83,50 +134,32 @@ function retrieveBlob(client: DisperserClient, request: RetrieveBlobRequest): Pr
     });
 }
 
-function decode(data: string): any {
-    const inputBuffer = Buffer.from(data, 'base64');
-    const outputBuffer = decodeFromBN254FieldElements(inputBuffer);
-    return JSON.parse(outputBuffer.toString('utf-8'));
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function prompt(question: string): Promise<string> {
+    return new Promise((resolve) => {
+        rl.question(question, (answer) => {
+            resolve(answer);
+        });
+    });
 }
 
-async function disperseBlobRoutine() {
-    const client = new DisperserClient(EIGEN_ENDPOINT, grpc.credentials.createSsl());
-
-    const data = {
-        name: 'Alice',
-        age: 30,
-        city: 'New York'
+async function main() {
+    const action = parseInt(await prompt("Choose action (1: Disperse Blob, 2: Retrieve Blob): "));
+    if (action === 1) {
+        const data = await prompt("Enter data to disperse: ");
+        await disperseBlobRoutine(data);
+    } else if (action === 2) {
+        const requestId = await prompt("Enter request ID: ");
+        await getBlobRoutine(requestId);
+    } else {
+        console.log(`Unrecognized action: ${action}`);
+        exit(1);
     }
-    const encoded = encode(data);
-    const request = new DisperseBlobRequest();
-    request.setData(encoded);
-    const response = await disperseBlob(client, request);
-    console.log(response.toObject());
+    exit(0);
 }
 
-async function getBlobStatusRoutine() {
-    const client = new DisperserClient(EIGEN_ENDPOINT, grpc.credentials.createSsl());
-
-    const REQUEST_ID = 'OGEyYTVjOWI3Njg4MjdkZTVhOTU1MmMzOGEwNDRjNjY5NTljNjhmNmQyZjIxYjUyNjBhZjU0ZDJmODdkYjgyNy0zMTM3MzIzNTM1MzMzNTMyMzgzNzM2MzMzMzMzMzIzNDMyMzIzNjJmMzAyZjMzMzMyZjMxMmYzMzMzMmZlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1';
-    const request = new BlobStatusRequest();
-    request.setRequestId(REQUEST_ID);
-    const response = await getBlobStatus(client, request);
-    console.log(response.toObject());
-    console.log(response.toObject().info?.blobVerificationProof?.batchMetadata);
-}
-
-async function retrieveBlobRoutine() {
-    const client = new DisperserClient(EIGEN_ENDPOINT, grpc.credentials.createSsl());
-
-    const BLOB_INDEX = 68;
-    const batchHeaderHash = 'JIEh2k1GTbaxNwFBQz3TP4i2i4zdh3SdC8qypxeZlFM=';
-    const request = new RetrieveBlobRequest();
-    request.setBlobIndex(BLOB_INDEX);
-    request.setBatchHeaderHash(batchHeaderHash);
-    const response = await retrieveBlob(client, request);
-    console.log(response.toObject());
-}
-
-// disperseBlobRoutine();
-// getBlobStatusRoutine()
-retrieveBlobRoutine();
+main();
