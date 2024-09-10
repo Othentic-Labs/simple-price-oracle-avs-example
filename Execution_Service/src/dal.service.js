@@ -22,15 +22,13 @@ function init() {
 }
 
 async function sendTask(proofOfTask, data, taskDefinitionId) {
-  
   var wallet = new ethers.Wallet(privateKey);
   var performerAddress = wallet.address;
-  
   data = ethers.hexlify(ethers.toUtf8Bytes(data));
   const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "bytes", "address", "uint16"], [proofOfTask, data, performerAddress, taskDefinitionId]);
   const messageHash = ethers.keccak256(message);
   const sig = wallet.signingKey.sign(messageHash).serialized;
-  
+
   const jsonRpcBody = {
     jsonrpc: "2.0",
     method: "sendTask",
@@ -42,31 +40,18 @@ async function sendTask(proofOfTask, data, taskDefinitionId) {
       sig,
     ]
   };
-  try {
-    const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
-    const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-    console.log("API response:", response);
+    try {
+      const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
+      const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
+      console.log("API response:", response);
   } catch (error) {
-    console.error("Error making API request:", error);
+      console.error("Error making API request:", error);
   }
-}
-
-async function publishJSONToIpfs(data) {
-  var proofOfTask = '';
-  try {   
-    const pinata = new pinataSDK(pinataApiKey, pinataSecretApiKey);
-    const response = await pinata.pinJSONToIPFS(data);
-    proofOfTask = response.IpfsHash;
-    console.log(`proofOfTask: ${proofOfTask}`);
-  }
-  catch (error) {  
-    console.error("Error making API request to pinataSDK:", error);
-  }
-  return proofOfTask;
 }
 
 async function publishToEigenDA(data) {
-  var proofOfTask = '';
+  let proofOfTask = '';
+  let poll = null;
   try {
     const encoded = encode(data);
     const request = new DisperseBlobRequest();
@@ -74,12 +59,11 @@ async function publishToEigenDA(data) {
     const response = await disperseBlob(client, request);
     proofOfTask = response.toObject().requestId;
     console.log(`proofOfTask: ${proofOfTask}`);
-    const confirmation = await pollForBlobStatus(client, proofOfTask);
-    console.log(`Blob dispersal confirmed. Confirmation: ${confirmation}`);
+    poll = pollForBlobStatus(client, proofOfTask);
   } catch (error) {
     console.error("Error making API request to EigenDA:", error);
   }
-  return proofOfTask;
+  return [proofOfTask, poll];
 }
 
 function pollForBlobStatus(client, cid, interval = 30000) {
@@ -100,9 +84,8 @@ function pollForBlobStatus(client, cid, interval = 30000) {
           retrieveRequest.setBlobIndex(blobIndex);
           retrieveRequest.setBatchHeaderHash(batchHeaderHash);
           const response = await retrieveBlob(client, retrieveRequest);
-          const data = Buffer.from(response.getData()).toString('utf-8').replace(/\0/g, '');
-          console.log(`Data retrieved: ${data}`);
-          resolve(JSON.parse(data)); // Return the parsed data
+          const blob = Buffer.from(response.getData()).toString('utf-8').replace(/\0/g, '');  // regex is necessary because eigenDA encoding includes null bytes which are invalid in JSON
+          resolve(JSON.parse(blob)); // Return the parsed data
         } else {
           console.log('Blob dispersal is still in progress. Blob status:');
           console.log(statusResponse.toObject());
@@ -176,7 +159,6 @@ function encodeToBN254FieldElements(inputBuffer) {
 
 module.exports = {
   init,
-  publishJSONToIpfs,
   publishToEigenDA,
   sendTask,
 }

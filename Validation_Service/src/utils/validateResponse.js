@@ -9,8 +9,8 @@ module.exports = class CustomResponse {
     /**
      * @param {any} data 
      */
-    constructor(data) {
+    constructor(data, message) {
         this.data = data
-
+        this.message = message
     }
 }

@@ -1,26 +1,15 @@
 require('dotenv').config();
-const axios = require("axios");
 const grpc = require('grpc');
 const { DisperserClient } = require('../eigenDA/bindings/disperser/disperser_grpc_pb');
 const { BlobStatusRequest, RetrieveBlobRequest } = require('../eigenDA/bindings/disperser/disperser_pb');
 
 const EIGEN_ENDPOINT = 'disperser-holesky.eigenda.xyz:443';
-
-var ipfsHost='';
 var client;
 
 function init() {
-  ipfsHost = process.env.IPFS_HOST;
   client = new DisperserClient(EIGEN_ENDPOINT, grpc.credentials.createSsl());
 }
 
-async function getIPfsTask(cid) {
-  const { data } = await axios.get(ipfsHost + cid);
-  return {
-    symbol: data.symbol,
-    price: parseFloat(data.price),
-  };
-}
 
 async function getEigenDATask(cid) {
   const statusRequest = new BlobStatusRequest();
@@ -69,6 +58,5 @@ function retrieveBlob(client, request) {
 
 module.exports = {
   init,
-  getIPfsTask,
   getEigenDATask,
 }
