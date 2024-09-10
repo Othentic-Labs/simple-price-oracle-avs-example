@@ -1,8 +1,8 @@
 require('dotenv').config();
 const axios = require("axios");
-import * as grpc from 'grpc';
-import { DisperserClient } from './eigenDA/bindings/disperser/disperser_grpc_pb';
-import { BlobStatusRequest } from './eigenDA/bindings/disperser/disperser_pb';
+const grpc = require('grpc');
+const { DisperserClient } = require('../eigenDA/bindings/disperser/disperser_grpc_pb');
+const { BlobStatusRequest, RetrieveBlobRequest } = require('../eigenDA/bindings/disperser/disperser_pb');
 
 const EIGEN_ENDPOINT = 'disperser-holesky.eigenda.xyz:443';
 
@@ -32,20 +32,32 @@ async function getEigenDATask(cid) {
   if (!blobIndex || !batchHeaderHash) {
     console.log('Blob dispersal is still in progress. Blob status:');
     console.log(statusResponse.toObject());
-    return;
+    return null;
   }
   
   const retrieveRequest = new RetrieveBlobRequest();
   retrieveRequest.setBlobIndex(blobIndex);
   retrieveRequest.setBatchHeaderHash(batchHeaderHash);
   const response = await retrieveBlob(client, retrieveRequest);
-  const data = Buffer.from(response.getData()).toString('utf-8');
+  const data = Buffer.from(response.getData()).toString('utf-8').replace(/\0/g, '');
   return JSON.parse(data);
 }
 
 function getBlobStatus(client, request) {
   return new Promise((resolve, reject) => {
     client.getBlobStatus(request, (err, response) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
+function retrieveBlob(client, request) {
+  return new Promise((resolve, reject) => {
+    client.retrieveBlob(request, (err, response) => {
       if (err) {
         reject(err);
       } else {

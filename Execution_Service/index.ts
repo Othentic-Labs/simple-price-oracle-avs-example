@@ -47,6 +47,7 @@ async function getBlobRoutine(requestId: string) {
     const data = Buffer.from(response.getData()).toString('utf-8');
     console.log('Decoded data:');
     console.log(data);
+    console.log(JSON.parse(data.replace(/\0/g, '')));
 }
 
 function encode(data: any): string {

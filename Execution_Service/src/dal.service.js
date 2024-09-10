@@ -1,9 +1,9 @@
 require('dotenv').config();
 const pinataSDK = require("@pinata/sdk");
 const { ethers } = require('ethers');
-import * as grpc from 'grpc';
-import { DisperserClient } from './eigenDA/bindings/disperser/disperser_grpc_pb';
-import { DisperseBlobRequest } from './eigenDA/bindings/disperser/disperser_pb';
+const grpc = require('grpc');
+const { DisperserClient } = require('../eigenDA/bindings/disperser/disperser_grpc_pb');
+const { DisperseBlobRequest, BlobStatusRequest, RetrieveBlobRequest } = require('../eigenDA/bindings/disperser/disperser_pb');
 
 const EIGEN_ENDPOINT = 'disperser-holesky.eigenda.xyz:443';
 
@@ -72,11 +72,59 @@ async function publishToEigenDA(data) {
     const request = new DisperseBlobRequest();
     request.setData(encoded);
     const response = await disperseBlob(client, request);
-    proofOfTask = response.getRequestId();
+    proofOfTask = response.toObject().requestId;
+    console.log(`proofOfTask: ${proofOfTask}`);
+    const confirmation = await pollForBlobStatus(client, proofOfTask);
+    console.log(`Blob dispersal confirmed. Confirmation: ${confirmation}`);
   } catch (error) {
     console.error("Error making API request to EigenDA:", error);
   }
   return proofOfTask;
+}
+
+function pollForBlobStatus(client, cid, interval = 30000) {
+  const statusRequest = new BlobStatusRequest();
+  statusRequest.setRequestId(cid);
+
+  return new Promise((resolve, reject) => {
+    const poll = setInterval(async () => {
+      try {
+        const statusResponse = await getBlobStatus(client, statusRequest);
+        const blobIndex = statusResponse.getInfo()?.getBlobVerificationProof()?.getBlobIndex();
+        const batchHeaderHash = statusResponse.getInfo()?.getBlobVerificationProof()?.getBatchMetadata()?.getBatchHeaderHash();
+        
+        if (blobIndex && batchHeaderHash) {
+          clearInterval(poll); // Stop polling once we have valid data
+          
+          const retrieveRequest = new RetrieveBlobRequest();
+          retrieveRequest.setBlobIndex(blobIndex);
+          retrieveRequest.setBatchHeaderHash(batchHeaderHash);
+          const response = await retrieveBlob(client, retrieveRequest);
+          const data = Buffer.from(response.getData()).toString('utf-8').replace(/\0/g, '');
+          console.log(`Data retrieved: ${data}`);
+          resolve(JSON.parse(data)); // Return the parsed data
+        } else {
+          console.log('Blob dispersal is still in progress. Blob status:');
+          console.log(statusResponse.toObject());
+        }
+      } catch (error) {
+        clearInterval(poll); // Stop polling in case of error
+        reject(error); // Reject the promise if there's an error
+      }
+    }, interval);
+  });
+}
+
+function getBlobStatus(client, request) {
+  return new Promise((resolve, reject) => {
+    client.getBlobStatus(request, (err, response) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(response);
+      }
+    });
+  });
 }
 
 function disperseBlob(client, request){
@@ -89,6 +137,41 @@ function disperseBlob(client, request){
       }
     });
   });
+}
+
+function retrieveBlob(client, request) {
+  return new Promise((resolve, reject) => {
+    client.retrieveBlob(request, (err, response) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
+function encode(data) {
+  const inputBuffer = Buffer.from(JSON.stringify(data), 'utf-8');
+  const outputBuffer = encodeToBN254FieldElements(inputBuffer);
+  return outputBuffer.toString('base64');
+}
+
+function encodeToBN254FieldElements(inputBuffer) {
+  const nullByte = Buffer.from([0x00]);
+  const byteGroupSize = 31;
+  const outputBuffers = [];
+
+  for (let i = 0; i < inputBuffer.length; i += byteGroupSize) {
+    // Extract the next 31-byte chunk from the input buffer
+    const chunk = inputBuffer.subarray(i, i + byteGroupSize);
+
+    // Prepend the chunk with a null byte and push it to the output array
+    outputBuffers.push(Buffer.concat([nullByte, chunk]));
+  }
+
+  // Concatenate all chunks into a single output buffer
+  return Buffer.concat(outputBuffers);
 }
 
 module.exports = {
