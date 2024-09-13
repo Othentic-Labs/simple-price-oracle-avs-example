@@ -70,8 +70,8 @@ services:
 
 - Aggregator node
 - 3 Attester nodes
-- AVS WebAPI endpoint
-- TaskPerformer endpoint
+- Validation Service endpoint
+- Execution Service endpoint
 - Sync Shares of operators across layers
 
 
