@@ -1,4 +1,6 @@
 # 🍀 Othentic AVS Samples
+![Price oracle sample](https://github.com/user-attachments/assets/03d544eb-d9c3-44a7-9712-531220c94f7e)
+
 
 # ⚙️ Set Up
 
