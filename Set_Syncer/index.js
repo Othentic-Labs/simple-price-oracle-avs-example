@@ -33,7 +33,7 @@ try {
     process.exit(1);
 }
 process.env.PRIVATE_KEY = privateKeyDeployer;
-const output = execSync(`othentic-cli network set-syncer --syncer-address ${syncerAddress}`, { encoding: 'utf-8'});
+const output = execSync(`othentic-cli network set-syncer --syncer-address ${syncerAddress} --l2-chain ${process.argv[3]}`, { encoding: 'utf-8'});
 console.log(output);
 
 

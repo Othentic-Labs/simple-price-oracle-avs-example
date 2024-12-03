@@ -8,7 +8,7 @@ x-othentic-cli: &othentic-cli
 services:
   aggregator:
     <<: *othentic-cli
-    command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "amoy"]
+    command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "${L2:-amoy}"]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR:-${PRIVATE_KEY:-}}
     ports:
@@ -26,7 +26,7 @@ services:
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
-      "--l2-chain", "amoy",
+      "--l2-chain", "${L2:-amoy}",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1:-${PRIVATE_KEY_VALIDATOR1:-}}
@@ -46,7 +46,7 @@ services:
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
-      "--l2-chain", "amoy",
+      "--l2-chain", "${L2:-amoy}",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER2:-${PRIVATE_KEY_VALIDATOR2:-}}
@@ -66,7 +66,7 @@ services:
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
-      "--l2-chain", "amoy",
+      "--l2-chain", "${L2:-amoy}",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER3:-${PRIVATE_KEY_VALIDATOR3:-}}
@@ -83,6 +83,9 @@ services:
     build:
       context: .
       dockerfile: ./Set_Syncer/Dockerfile
+    command: [
+      "--l2-chain", "${L2:-amoy}",
+    ]
   syncer:
     <<: *othentic-cli
     command: [
@@ -90,7 +93,7 @@ services:
       "sync",
       "--sync-interval", "12h",
       "--l1-chain", "holesky",
-      "--l2-chain", "amoy",
+      "--l2-chain", "${L2:-amoy}",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_SYNCER}
