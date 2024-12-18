@@ -1,6 +1,7 @@
 # Simple Price Oracle AVS Example
 
-This repository demonstrates the implementation of a simple price oracle AVS using Othentic stack.
+This repository demonstrates how to implement a simple price oracle AVS using the Othentic stack.
+
 ---
 
 ## Table of Contents
@@ -19,7 +20,6 @@ This repository demonstrates the implementation of a simple price oracle AVS usi
 The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS using Othentic stack.
 
 
-![Price oracle sample](https://github.com/user-attachments/assets/03d544eb-d9c3-44a7-9712-531220c94f7e)
 
 ### Features
 
@@ -29,28 +29,28 @@ The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS usi
 ## Project Structure
 
 ```mdx
-<pre>
 📂 simple-price-oracle-avs-example
 ├── Execution_Service  # Implements task execution logic
 ├── Validation_Service # Implements task validation logic
 ├── grafana            # Grafana monitoring configuration
 ├── docker-compose.yml # Docker setup for Operator Nodes (Performer, Attesters, Aggregator), Execution Service, Validation Service, and monitoring tools
 └── README.md          # Project documentation
-</pre>
 ```
 
 ## Architecture
+
+![Price oracle sample](https://github.com/user-attachments/assets/03d544eb-d9c3-44a7-9712-531220c94f7e)
 
 The Performer node executes tasks using the Task Execution Service and sends the results to the p2p network.
 
 Attester Nodes validate task execution through the Validation Service. Based on the Validation Service's response, attesters sign the tasks. In this AVS:
 
-Task Execution logic includes:
+Task Execution logic:
 - Fetch the ETHUSDT price.
 - Store the result in IPFS.
 - Share the IPFS CID as proof.
 
-Validation Service logic includes:
+Validation Service logic:
 - Retrieve the price from IPFS using the CID.
 - Get the expected ETHUSDT price.
 - Validate by comparing the actual and expected prices within an acceptable margin.
@@ -82,6 +82,7 @@ Validation Service logic includes:
 
 Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/avs-framework/quick-start#steps) Guide for setup and deployment.
 
+### Next
 Modify the different configurations, tailor the task execution logic as per your use case, and run the AVS.
 
 Happy Building! 🚀
