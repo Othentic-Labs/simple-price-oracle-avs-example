@@ -1,6 +1,6 @@
 # Simple Price Oracle AVS Example
 
-This repository demonstrates how to implement a simple price oracle AVS using the Othentic stack.
+This repository demonstrates how to implement a simple price oracle AVS using the Othentic Stack.
 
 ---
 
@@ -17,7 +17,7 @@ This repository demonstrates how to implement a simple price oracle AVS using th
 
 ## Overview
 
-The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS using Othentic stack.
+The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS using Othentic Stack.
 
 
 
