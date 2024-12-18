@@ -22,7 +22,7 @@ services:
     command: [
       "node",
       "attester",
-      "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      "/ip4/10.8.0.69/tcp/9876/p2p/${BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
@@ -42,7 +42,7 @@ services:
     command: [
       "node",
       "attester",
-      "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      "/ip4/10.8.0.69/tcp/9876/p2p/${BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
@@ -62,7 +62,7 @@ services:
     command: [
       "node",
       "attester",
-      "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      "/ip4/10.8.0.69/tcp/9876/p2p/${BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "holesky",
