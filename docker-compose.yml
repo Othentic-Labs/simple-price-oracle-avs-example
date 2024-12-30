@@ -8,7 +8,7 @@ x-othentic-cli: &othentic-cli
 services:
   aggregator:
     <<: *othentic-cli
-    command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "${L2:-amoy}", "--metrics", "--internal-tasks"]
+    command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "${L2:-amoy}", "--metrics", "--internal-tasks", "--sync-interval", "1h:30m"]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR:-${PRIVATE_KEY:-}}
     ports:
