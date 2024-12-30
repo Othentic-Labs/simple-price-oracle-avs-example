@@ -8,7 +8,7 @@ x-othentic-cli: &othentic-cli
 services:
   aggregator:
     <<: *othentic-cli
-    command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "${L2:-amoy}", "--metrics"]
+    command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "${L2:-amoy}", "--metrics", "--internal-tasks"]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR:-${PRIVATE_KEY:-}}
     ports:
@@ -77,34 +77,6 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.4
-  set-syncer:
-    env_file:
-      - .env
-    build:
-      context: .
-      dockerfile: ./Set_Syncer/Dockerfile
-    command: [
-      "--l2-chain", "${L2:-amoy}",
-    ]
-  syncer:
-    <<: *othentic-cli
-    command: [
-      "node",
-      "sync",
-      "--sync-interval", "12h",
-      "--l1-chain", "holesky",
-      "--l2-chain", "${L2:-amoy}",
-    ]
-    environment:
-      - PRIVATE_KEY=${PRIVATE_KEY_SYNCER}
-      - ATTESTATION_CENTER_ADDRESS=${ATTESTATION_CENTER_ADDRESS}
-      - AVS_GOVERNANCE_ADDRESS=${AVS_GOVERNANCE_ADDRESS}
-    depends_on:
-      set-syncer:
-        condition: service_completed_successfully
-    networks:
-      p2p:
-        ipv4_address: 10.8.0.6
   validation-service:
     build:
       context: ./Validation_Service
