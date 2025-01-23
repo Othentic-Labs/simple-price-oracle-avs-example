@@ -8,7 +8,7 @@ This repository demonstrates how to implement a simple price oracle AVS using th
 
 1. [Overview](#overview)
 2. [Project Structure](#project-structure)
-3. [Architecture](#usage)
+3. [Architecture](#architecture)
 4. [Prerequisites](#prerequisites)
 5. [Installation](#installation)
 6. [Usage](#usage)
