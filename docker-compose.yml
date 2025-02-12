@@ -11,6 +11,8 @@ services:
     command: ["node", "aggregator", "--json-rpc", "--l1-chain", "holesky", "--l2-chain", "${L2:-amoy}", "--metrics", "--internal-tasks", "--sync-interval", "5400000", "--p2p.datadir", "data/peerstore"]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
+    volumes:
+      - ./data/peerstore:/app/data/peerstore
     ports:
       - "8545:8545"
       - "9876:9876"
