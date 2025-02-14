@@ -1,58 +1,13 @@
 require('dotenv').config();
 const axios = require("axios");
 const { ethers } = require("ethers")
-const provider = new ethers.JsonRpcProvider("https://rpc.ankr.com/eth_sepolia")
+const aggregatorV3InterfaceABI = require("./abi/aggregatorV3Interface");
 
-const aggregatorV3InterfaceABI = [
-  {
-    inputs: [],
-    name: "decimals",
-    outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "description",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint80", name: "_roundId", type: "uint80" }],
-    name: "getRoundData",
-    outputs: [
-      { internalType: "uint80", name: "roundId", type: "uint80" },
-      { internalType: "int256", name: "answer", type: "int256" },
-      { internalType: "uint256", name: "startedAt", type: "uint256" },
-      { internalType: "uint256", name: "updatedAt", type: "uint256" },
-      { internalType: "uint80", name: "answeredInRound", type: "uint80" },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "latestRoundData",
-    outputs: [
-      { internalType: "uint80", name: "roundId", type: "uint80" },
-      { internalType: "int256", name: "answer", type: "int256" },
-      { internalType: "uint256", name: "startedAt", type: "uint256" },
-      { internalType: "uint256", name: "updatedAt", type: "uint256" },
-      { internalType: "uint80", name: "answeredInRound", type: "uint80" },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "version",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-];
-const ETH_USD_24HR_VOLATILITY_ADDRESS = "0x31D04174D0e1643963b38d87f26b0675Bb7dC96e"
+// Set default values for Sepolia
+const DEFAULT_RPC_URL = "https://rpc.ankr.com/eth_sepolia";
+const DEFAULT_VOLATILITY_FEED_ADDRESS = "0x31D04174D0e1643963b38d87f26b0675Bb7dC96e";
+const provider = new ethers.JsonRpcProvider(process.env.ETH_RPC_URL || DEFAULT_RPC_URL);
+const ETH_USD_24HR_VOLATILITY_ADDRESS = process.env.VOLATILITY_FEED_ADDRESS || DEFAULT_VOLATILITY_FEED_ADDRESS;
 
 function calculateFee(tradeSize, marketVolatility) {
   const baseFee = 3.5;
@@ -65,13 +20,38 @@ function calculateFee(tradeSize, marketVolatility) {
   return Math.min(fee, maxFee); 
 }
 
+async function getVolatility() {
+  try {
+    const response = await axios.get(`https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT`);
+    const priceChangePercent = parseFloat(response.data.priceChangePercent) / 100; // Convert to decimal
+    const volatility = Math.abs(priceChangePercent); // Simple absolute price change as volatility
+    
+    console.log("Fetched Volatility:", volatility);
+    return volatility;
+  } catch (err) {
+    console.error("Error fetching volatility:", err.message);
+    return null;
+  }
+}
+
+async function getVolatilityUsingChainlink() {
+  try {
+    const volatilityFeed = new ethers.Contract(ETH_USD_24HR_VOLATILITY_ADDRESS, aggregatorV3InterfaceABI, provider);
+    const decimals = await volatilityFeed.decimals();
+    const roundData = await volatilityFeed.latestRoundData();
+    const volatility = Number(roundData[1]) / 10 ** Number(decimals);
+    return volatility;
+  } catch (err) {
+    console.error("Error fetching volatility from Chain Link contracts:", err.message);
+    return null;
+  }
+}
+
 async function getFee(volume) {
   var res = null;
     try {
-        const volatilityFeed = new ethers.Contract(ETH_USD_24HR_VOLATILITY_ADDRESS, aggregatorV3InterfaceABI, provider);
-        const decimals = await volatilityFeed.decimals();
-        const roundData = await volatilityFeed.latestRoundData();
-        const volatility = Number(roundData[1]) / 10 ** Number(decimals);
+        // const volatility = await getVolatilityUsingChainlink(); // ETHUSD
+        const volatility = await getVolatility(); // ETHUSDT
         var fee = calculateFee(volume, volatility);
         console.log("Calculated Fee", fee);
         res = fee
@@ -81,6 +61,4 @@ async function getFee(volume) {
     return res;
   }
   
-  module.exports = {
-    getFee: getFee,
-  }
+  module.exports = { getFee }
