@@ -11,7 +11,6 @@ function init() {
 async function getIPfsTask(cid) {
     const { data } = await axios.get(ipfsHost + cid);
     return {
-      volume: parseFloat(data.volume),
       fee: parseFloat(data.fee),
     };
   }  

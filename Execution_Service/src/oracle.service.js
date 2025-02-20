@@ -9,13 +9,13 @@ const DEFAULT_VOLATILITY_FEED_ADDRESS = "0x31D04174D0e1643963b38d87f26b0675Bb7dC
 const provider = new ethers.JsonRpcProvider(process.env.ETH_RPC_URL || DEFAULT_RPC_URL);
 const ETH_USD_24HR_VOLATILITY_ADDRESS = process.env.VOLATILITY_FEED_ADDRESS || DEFAULT_VOLATILITY_FEED_ADDRESS;
 
-function calculateFee(tradeSize, marketVolatility) {
+function calculateFee(marketVolatility) {
   const baseFee = 3.5;
   const maxFee = 5.5;
   const tradeThreshold = 150; // ETH
   const volatilityThreshold = 0.60; // 60%
 
-  let fee = 2 * (tradeSize / tradeThreshold) * Math.pow((marketVolatility / volatilityThreshold), 2) + baseFee;
+  let fee = 2 * Math.pow((marketVolatility / volatilityThreshold), 2) + baseFee;
 
   return Math.min(fee, maxFee); 
 }
@@ -47,12 +47,12 @@ async function getVolatilityUsingChainlink() {
   }
 }
 
-async function getFee(volume) {
+async function getFee() {
   var res = null;
     try {
         // const volatility = await getVolatilityUsingChainlink(); // ETHUSD
         const volatility = await getVolatility(); // ETHUSDT
-        var fee = calculateFee(volume, volatility);
+        var fee = calculateFee(volatility);
         console.log("Calculated Fee", fee);
         res = fee
     } catch (err) {
