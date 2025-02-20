@@ -1,6 +1,6 @@
 # Simple Price Oracle AVS Example
 
-This repository demonstrates how to implement a simple price oracle AVS using the Othentic Stack.
+This repository demonstrates how to implement a Dynamic Fees AMM using the Othentic Stack and Uniswap V4 Hooks.
 
 ---
 
@@ -20,7 +20,6 @@ This repository demonstrates how to implement a simple price oracle AVS using th
 The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS using Othentic Stack.
 
 
-
 ### Features
 
 - **Containerised deployment:** Simplifies deployment and scaling.
@@ -30,12 +29,12 @@ The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS usi
 
 ```mdx
 📂 simple-price-oracle-avs-example
-├── 📂 Execution_Service         # Implements Task execution logic - Express JS Backend
+├── 📂 Execution_Service         # Implements Fee Generation logic - Express JS Backend
 │   ├── 📂 config/
 │   │   └── app.config.js        # An Express.js app setup with dotenv, and a task controller route for handling `/task` endpoints.
 │   ├── 📂 src/
 │   │   └── dal.service.js       # A module that interacts with Pinata for IPFS uploads
-│   │   ├── oracle.service.js    # A utility module to fetch the current price of a cryptocurrency pair from the Binance API
+│   │   ├── oracle.service.js    # A utility module to fetch the volatility of the cryptocurrency pair from the Binance API
 │   │   ├── task.controller.js   # An Express.js router handling a `/execute` POST endpoint
 │   │   ├── 📂 utils             # Defines two custom classes, CustomResponse and CustomError, for standardizing API responses
 │   ├── Dockerfile               # A Dockerfile that sets up a Node.js (22.6) environment, exposes port 8080, and runs the application via index.js
@@ -47,7 +46,7 @@ The Simple Price Oracle AVS Example demonstrates how to deploy a minimal AVS usi
 │   │   └── app.config.js         # An Express.js app setup with a task controller route for handling `/task` endpoints.
 │   ├── 📂 src/
 │   │   └── dal.service.js        # A module that interacts with Pinata for IPFS uploads
-│   │   ├── oracle.service.js     # A utility module to fetch the current price of a cryptocurrency pair from the Binance API
+│   │   ├── oracle.service.js     # A utility module to fetch the current volatility of a cryptocurrency pair from the Binance API
 │   │   ├── task.controller.js    # An Express.js router handling a `/validate` POST endpoint
 │   │   ├── validator.service.js  # A validation module that checks if a task result from IPFS matches the ETH/USDT price within a 5% margin.
 │   │   ├── 📂 utils              # Defines two custom classes, CustomResponse and CustomError, for standardizing API responses.
