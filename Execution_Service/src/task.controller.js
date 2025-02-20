@@ -16,7 +16,7 @@ router.post("/execute", async (req, res) => {
         console.log(`taskDefinitionId: ${taskDefinitionId}`);
         const result = await oracleService.getFee(tradeVolume);
         const cid = await dalService.publishJSONToIpfs({fee: result});
-        const data = "hello";
+        const data = Math.floor(result * 1e6) ;
         await dalService.sendTask(cid, data, taskDefinitionId);
         return res.status(200).send(new CustomResponse({proofOfTask: cid, data: data, taskDefinitionId: taskDefinitionId}, "Task executed successfully"));
     } catch (error) {
