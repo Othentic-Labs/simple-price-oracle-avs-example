@@ -48,29 +48,6 @@ contract DynamicFeesAvsHook is IAvsLogic, BaseHook {
         uint256[] calldata _attestersIds
     ) external {}
 
-    function _afterInitialize(address, PoolKey calldata key, uint160, int24)
-        internal
-        virtual
-        override
-        onlyPoolManager
-        returns (bytes4)
-    {
-        uint24 INITIAL_FEE = 3000; // 0.3%
-        poolManager.updateDynamicLPFee(key, INITIAL_FEE);
-        return BaseHook.afterInitialize.selector;
-    }
-
-    function _beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata)
-        internal
-        virtual
-        override
-        onlyPoolManager
-        returns (bytes4, BeforeSwapDelta, uint24)
-    {
-        poolManager.updateDynamicLPFee(key, fee);
-        return (BaseHook.beforeSwap.selector, BeforeSwapDelta.wrap(0), fee);
-    }
-
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
             beforeInitialize: false,
@@ -88,5 +65,28 @@ contract DynamicFeesAvsHook is IAvsLogic, BaseHook {
             afterAddLiquidityReturnDelta: false,
             afterRemoveLiquidityReturnDelta: false
         });
+    }
+
+    function _beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata)
+        internal
+        virtual
+        override
+        onlyPoolManager
+        returns (bytes4, BeforeSwapDelta, uint24)
+    {
+        poolManager.updateDynamicLPFee(key, fee);
+        return (BaseHook.beforeSwap.selector, BeforeSwapDelta.wrap(0), fee);
+    }
+
+    function _afterInitialize(address, PoolKey calldata key, uint160, int24)
+        internal
+        virtual
+        override
+        onlyPoolManager
+        returns (bytes4)
+    {
+        uint24 INITIAL_FEE = 3000; // 0.3%
+        poolManager.updateDynamicLPFee(key, INITIAL_FEE);
+        return BaseHook.afterInitialize.selector;
     }
 }
