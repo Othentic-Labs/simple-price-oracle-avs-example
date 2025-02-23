@@ -2,7 +2,6 @@ require('dotenv').config();
 const axios = require("axios");
 
 
-
 async function getPrice(pair) {
   var res = null;
     try {
@@ -10,7 +9,8 @@ async function getPrice(pair) {
         res = result.data;
 
     } catch (err) {
-      console.error("binance api:" + err)
+      result = await axios.get(`https://api.binance.us/api/v3/ticker/price?symbol=${pair}`);
+      res = result.data;
     }
     return res;
   }
