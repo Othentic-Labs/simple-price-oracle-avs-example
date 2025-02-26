@@ -6,6 +6,7 @@ import subprocess
 import dotenv
 from web3 import Web3
 from eth_account import Account
+from eth_account.messages import encode_defunct
 from eth_abi import encode
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -57,12 +58,34 @@ def sign_csr_with_vault(csr_pem):
     return certificate
 
 def hwValBash():
+    
+    #For once hwval is done
+    """
     try:
         output = subprocess.check_output(["sudo ./devil.sh"], universal_newlines=True).strip()
     except Exception as e:
         output = f"hw_validation_error: {str(e)}"
     print("Running ur worst nightmare: ", output)
     return output
+    """
+
+    #Dummy data for now
+    output = {
+    "PCIID Device": "0x2484",
+    "PCIID Vendor": "0x10de",
+    "Subsystem PCIID Device": "0x3908",
+    "Subsystem PCIID Vendor": "0x1462",
+    "GPU UUID": "GPU-bf218919-8350-f417-0e0a-4d9cfe06fc60",
+    "VBIOS": "94.04.3a.40.63",
+    "GPU Name": "NVIDIA GeForce RTX 3070",
+    "VBIOS Integrity": "pass",
+    "Kernel Module Check": "fail",
+    "Secure Boot": "Y",
+    "Kernel Image Validation": "pass",
+    "Virtualization Check": "pass"
+    }
+    return output
+
 
 def publishDataToIpfs(data):
     proof_of_task = ""
@@ -92,11 +115,6 @@ def sendTask():
     #keygen
     esk, epk = ephemeralKeyGen()
     print("esk: ", esk, "epk: ", epk)
-    certReq = create_csr(esk)
-    print("CSR: ", certReq)
-    csrPem = certReq.public_bytes(serialization.Encoding.PEM)
-    print("CSRPem: ", certReq)
-
 
     vaultToken = os.environ.get("VAULT_TOKEN")
     vaultAddy = os.environ.get("VAULT_ADDR")
@@ -104,9 +122,15 @@ def sendTask():
     print("vaultToken: ", vaultToken)
     print("vaultAddy: ", vaultAddy)
     print("vaultCaCertBundle: ", vaultCaCertBundle)
-
+    #Vault is picky abt algo, if PKI works with a FIPS curve, should b fine
+    """
+    certReq = create_csr(esk)
+    print("CSR: ", certReq)
+    csrPem = certReq.public_bytes(serialization.Encoding.PEM)
+    print("CSRPem: ", certReq)
     cert = sign_csr_with_vault(csrPem)
     print("Certificate: ", cert)
+    """
     account = deriveWallet(esk)
     print("account: ", account)
     # Retrieve hardware validation output.
@@ -118,16 +142,18 @@ def sendTask():
 
     print("proof of task: ", proofOfTask)
     taskDefId = 0
+    data = "quokkas".encode("utf-8")
 
     payload = encode(
         ['string', 'bytes', 'address', 'uint16'],
-        [proofOfTask, cert, account.address, taskDefId]
+        [proofOfTask, data, account.address, taskDefId]
     )
     print("payload:" , payload)
     #msg hash
     messageHash = Web3.keccak(payload)
     #Signature w/ ecdsa keys
-    signed = account.signHash(messageHash)
+    message = encode_defunct(primitive=payload)
+    signed = account.sign_message(message)
     signature = signed.signature.hex()
     print("signature: ", signature)
 
@@ -137,7 +163,7 @@ def sendTask():
         "method": "sendTask",
         "params": [
             proofOfTask,
-            cert,
+            data,
             taskDefId,
             account.address,
             signature
