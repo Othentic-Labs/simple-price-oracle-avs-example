@@ -10,9 +10,7 @@ router.post("/validate", async (req, res) => {
     console.log(`Request: ${req.body}`);
     console.log(`request stringified: ${JSON.stringify(req.body)}`)
 
-    //TODO: Figure out unwrapping issues. FOR NOW, unwrap manually
-    //var proofOfTask = req.body.proofOfTask;
-    var proofOfTask = req.body.params[0];
+    var proofOfTask = req.body.proofOfTask;
     console.log(`Validate task: proof of task: ${proofOfTask}`);
     try {
         const result = await validatorService.validate(proofOfTask);

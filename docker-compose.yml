@@ -111,6 +111,28 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.101
+
+  syncer:
+    <<: *othentic-cli
+    command:
+      [
+        "node",
+        "sync",
+        "--sync-interval",
+        "12h",
+        "--l1-chain",
+        "mainnet",
+        "--l2-chain",
+        "base",
+      ]
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY_SYNCER}
+      - ATTESTATION_CENTER_ADDRESS=${ATTESTATION_CENTER_ADDRESS}
+      - AVS_GOVERNANCE_ADDRESS=${AVS_GOVERNANCE_ADDRESS}
+    networks:
+      p2p:
+        ipv4_address: 10.8.0.6
+        
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
