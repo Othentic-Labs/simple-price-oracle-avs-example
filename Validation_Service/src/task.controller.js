@@ -7,6 +7,9 @@ const validatorService = require("./validator.service");
 const router = Router()
 
 router.post("/validate", async (req, res) => {
+    console.log(`Request: ${req.body}`);
+    console.log(`request stringified: ${JSON.stringify(req.body)}`)
+
     var proofOfTask = req.body.proofOfTask;
     console.log(`Validate task: proof of task: ${proofOfTask}`);
     try {
