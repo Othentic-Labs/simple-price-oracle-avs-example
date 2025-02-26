@@ -138,11 +138,13 @@ def sendTask():
     print("hwVal output!: ", hwValOutput)
     
     #PUT HWVAL INTO IPFS
-    proofOfTask = publishDataToIpfs(hwValOutput)
-
+    #TODO: BROKEN NOW, FOR NOW J RAW
+    #proofOfTask = publishDataToIpfs(hwValOutput)
+    proofOfTask = json.dumps(hwValOutput)
     print("proof of task: ", proofOfTask)
     taskDefId = 0
-    data = "quokkas".encode("utf-8")
+    #Get around it needing to be bytes for this abi encoder
+    data = ("quokkas".encode("utf-8"))
 
     payload = encode(
         ['string', 'bytes', 'address', 'uint16'],
@@ -157,6 +159,9 @@ def sendTask():
     signature = signed.signature.hex()
     print("signature: ", signature)
 
+    #Get around bytes being non-serializable
+    data = Web3.to_hex("quokkas".encode("utf-8"))
+
     # Build the JSON-RPC payload, now including the hardware validation output.
     rpc_payload = {
         "jsonrpc": "2.0",
@@ -169,6 +174,11 @@ def sendTask():
             signature
         ]
     }
+
+    print(rpc_payload)
+
+    #TEST ON LOCALHSOT ONLY:
+    rpcBaseAddy = "http://localhost:4002/task/validate"
     
     response = requests.post(rpcBaseAddy, json=rpc_payload)
     print("API response:", response.json())
