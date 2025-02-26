@@ -1,0 +1,81 @@
+Metadata-Version: 2.1
+Name: jsonrpcclient
+Version: 4.0.3
+Summary: Send JSON-RPC requests
+Author-email: Beau Barker <beau@explodinglabs.com>
+License: The MIT License (MIT)
+        
+        Copyright (c) 2015 Beau Barker (beau at explodinglabs.com)
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy of
+        this software and associated documentation files (the "Software"), to deal in
+        the Software without restriction, including without limitation the rights to
+        use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+        of the Software, and to permit persons to whom the Software is furnished to do
+        so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: homepage, https://www.jsonrpcclient.com
+Project-URL: repository, https://github.com/explodinglabs/jsonrpcclient
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: qa
+Requires-Dist: pytest ; extra == 'qa'
+Requires-Dist: pytest-cov ; extra == 'qa'
+Requires-Dist: tox ; extra == 'qa'
+
+<img
+    alt="jsonrpcclient"
+    style="margin: 0 auto;"
+    src="https://github.com/explodinglabs/jsonrpcclient/blob/main/docs/logo.png?raw=true"
+/>
+
+![PyPI](https://img.shields.io/pypi/v/jsonrpcclient.svg)
+![Code Quality](https://github.com/explodinglabs/jsonrpcclient/actions/workflows/code-quality.yml/badge.svg)
+![Coverage Status](https://coveralls.io/repos/github/explodinglabs/jsonrpcclient/badge.svg?branch=main)
+![Downloads](https://img.shields.io/pypi/dw/jsonrpcclient)
+
+Generate JSON-RPC requests and parse responses in Python.
+
+```sh
+pip install jsonrpcclient
+```
+
+Generate a request:
+
+```python
+from jsonrpcclient import request, parse
+req = request("ping")
+# => {'jsonrpc': '2.0', 'method': 'ping', 'id': 1}
+```
+
+Parse a response:
+
+```python
+parsed = parse({"jsonrpc": "2.0", "result": "pong", "id": 1})
+# => Ok(result='pong', id=1)
+```
+For strings, use `request_json` and `parse_json`. 
+
+[Watch a video on how to use it](https://www.youtube.com/watch?v=PxQagaZ0PsY)
+
+Full documentation is at [jsonrpcclient.com](https://www.jsonrpcclient.com/).
+
+See also: [jsonrpcserver](https://github.com/explodinglabs/jsonrpcserver)

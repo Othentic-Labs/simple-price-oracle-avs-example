@@ -1,7 +1,6 @@
 import os
 import json
 import hvac
-import requests
 import subprocess
 import dotenv
 from web3 import Web3
@@ -76,7 +75,7 @@ def hwValBash():
     "Subsystem PCIID Device": "0x3908",
     "Subsystem PCIID Vendor": "0x1462",
     "GPU UUID": "GPU-bf218919-8350-f417-0e0a-4d9cfe06fc60",
-    "VBIOS": "94.04.3a.40.63",
+    "VBIOS ID": "94.04.3a.40.63",
     "GPU Name": "NVIDIA GeForce RTX 3070",
     "VBIOS Integrity": "pass",
     "Kernel Module Check": "fail",
@@ -161,8 +160,11 @@ def sendTask():
 
     #Get around bytes being non-serializable
     data = Web3.to_hex("quokkas".encode("utf-8"))
+    performerAddress = account.address
 
     # Build the JSON-RPC payload, now including the hardware validation output.
+    #DEPRECATED! USING WEB3 FOR JSONRPC
+    """
     rpc_payload = {
         "jsonrpc": "2.0",
         "method": "sendTask",
@@ -170,17 +172,22 @@ def sendTask():
             proofOfTask,
             data,
             taskDefId,
-            account.address,
+            performerAddress,
             signature
         ]
     }
+    
 
     print(rpc_payload)
+    """
 
-    #TEST ON LOCALHSOT ONLY:
+    #TEST ON LOCALHSOT ONLY: REMOVE THIS WHEN/IF HOLESKY BACK UP
     rpcBaseAddy = "http://localhost:4002/task/validate"
     
-    response = requests.post(rpcBaseAddy, json=rpc_payload)
+    w3 = Web3(Web3.HTTPProvider(rpcBaseAddy))
+    response = w3.manager.request_blocking(
+        "sendTask", 
+        [proofOfTask, data, taskDefId, performerAddress, signature])
     print("API response:", response.json())
     return response.json()
 

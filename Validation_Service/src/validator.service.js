@@ -1,9 +1,7 @@
-
-import gpuMap from './gpuMap.json' assert {type: 'json'};
 require('dotenv').config();
 const dalService = require("./dal.service");
 const oracleService = require("./oracle.service");
-
+const gpuMap = require('./gpuMap.json'); 
 async function validate(proofOfTask) {
 
   try {
@@ -18,6 +16,11 @@ async function validate(proofOfTask) {
     let isApproved = true;
     
     //DONT FORGET THIS!!! WHEN IPFS, CHANGE THIS!!!
+    
+    console.log("Json parsed: ");
+    console.log(JSON.parse(proofOfTask));
+    console.log("Raw indexing: ");
+    console.log(proofOfTask["PCIID Device"]);
 
     var hwValOutput = JSON.parse(proofOfTask) 
     
@@ -26,7 +29,7 @@ async function validate(proofOfTask) {
     let subPciDevice = hwValOutput["Subsystem PCIID Device"];
     let subPciVendor = hwValOutput["Subsystem PCIID Vendor"];
     let uuid = hwValOutput["GPU UUID"];
-    let vbios = hwValOutput["VBIOS"];
+    let vbios = hwValOutput["VBIOS ID"];
     let gpuName = hwValOutput["GPU Name"];
     let vbiosIntegrity = hwValOutput["VBIOS Integrity"];
     let kernelModuleCheck = hwValOutput["Kernel Module Check"];
@@ -44,9 +47,11 @@ async function validate(proofOfTask) {
     //map pciid to gpu name
     mappedName = gpuMap[pciDevice]
     //if this doesn't match the gpu name extracted via nvml, shenanigans
-    if (mappedName.lower() != gpuName.lower()) {
+    if (String(mappedName).toLowerCase() != String(gpuName).toString().toLowerCase()) {
       isApproved = false;
       console.log(`Device PCIID ${pciDevice} maps to ${mappedName}, which doesn't match ${gpuName} the GPu name pulled from NVIDIA... Shenanigans likely`);
+    } else {
+      console.log(`Device PCIID ${pciDevice} maps to ${mappedName}, which matches ${gpuName}`);
     }
 
     //reject if vbios tampered with 
