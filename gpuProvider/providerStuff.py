@@ -15,8 +15,8 @@ from cryptography.x509.oid import NameOID
 #Generate ephemeral keypair
 #Returns tuple: ephemeral secret key, ephemeral public key
 def ephemeralKeyGen():
-    #generate ephemeral secret key
-    esk = ec.generate_private_key(ec.SECP256K1())
+    #generate ephemeral secret key, P256 is FIPS-compliant and Vault can sign it
+    esk = ec.generate_private_key(ec.SECP256R1())
     #extract ephemeral public key
     epk = esk.public_key()
     return esk, epk
@@ -30,12 +30,6 @@ def create_csr(esk):
     )
     csr = csr_builder.sign(esk, hashes.SHA256())
     return csr
-
-#Convert ecdsa to "eth" wallet
-def deriveWallet(esk):
-    eskBytes = esk.private_numbers().private_value.to_bytes(32, byteorder='big')
-    account = Account.from_key(eskBytes)
-    return account
 
 #Use Vault to sign the CSR via the PKI secrets engine.
 def sign_csr_with_vault(csr_pem):
@@ -54,7 +48,27 @@ def sign_csr_with_vault(csr_pem):
     )
     
     certificate = response['data']['certificate']
+    if not validate_vault_certificate(certificate):
+        raise ValueError("Invalid certificate received from Vault")
+        
     return certificate
+
+def validate_vault_certificate(certificate):
+    try:
+        cert = x509.load_pem_x509_certificate(certificate.encode())
+        # Verify certificate hasn't expired
+        
+        # Verify issuer (adjust according to your CA)
+        issuer = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+        print("Certificate issuer: ", issuer)
+        """
+        if issuer != "Your-Expected-CA-Name":
+            raise ValueError("Invalid certificate issuer")
+        """
+        return True
+    except Exception as e:
+        print(f"Certificate validation failed: {e}")
+        return False
 
 def hwValBash():
     
@@ -109,6 +123,11 @@ def publishDataToIpfs(data):
     
     return proof_of_task
 
+def deriveWallet(esk):
+    eskBytes = esk.private_numbers().private_value.to_bytes(32, byteorder='big')
+    account = Account.from_key(eskBytes)
+    return account
+
 def sendTask():
     rpcBaseAddy = os.environ.get("OTHENTIC_CLIENT_RPC_ADDRESS")
     print("rpcBaseAddy: ", rpcBaseAddy)
@@ -131,36 +150,41 @@ def sendTask():
     cert = sign_csr_with_vault(csrPem)
     print("Certificate: ", cert)
     """
-    account = deriveWallet(esk)
-    print("account: ", account)
     # Retrieve hardware validation output.
     hwValOutput = hwValBash()
     print("hwVal output!: ", hwValOutput)
+    epkEncoded = epk.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+    #DONT FORGET TO DECODE IT!!!
+    hwValOutput["EPK"] = epkEncoded
+    hwValOutput["Certificate"] = "DUMMY VAULT TODO"
+    print("hwValOutput with key + certificate: ", hwValOutput)
     
     #PUT HWVAL INTO IPFS
     #TODO: BROKEN NOW, FOR NOW J RAW
     #proofOfTask = publishDataToIpfs(hwValOutput)
-    proofOfTask = json.dumps(hwValOutput)
+    proofOfTask = json.dumps(hwValOutput, sort_keys=True, separators=(',', ':'))
     print("proof of task: ", proofOfTask)
     taskDefId = 0
     #Get around it needing to be bytes for this abi encoder
     data = ("quokkas".encode("utf-8"))
+    proofOfTaskBytes = proofOfTask.encode("utf-8")
+    signed = esk.sign(proofOfTaskBytes, ec.ECDSA(hashes.SHA256()))
+    signature = signed.hex()
+    print("signature: ", signature)
 
+    account = deriveWallet(esk)
+
+    """
     payload = encode(
         ['string', 'bytes', 'address', 'uint16'],
         [proofOfTask, data, account.address, taskDefId]
     )
-    print("payload:" , payload)
-    #msg hash
-    messageHash = Web3.keccak(payload)
-    #Signature w/ ecdsa keys
-    message = encode_defunct(primitive=payload)
-    signed = account.sign_message(message)
-    signature = signed.signature.hex()
-    print("signature: ", signature)
+    """
 
     #Get around bytes being non-serializable
-    data = Web3.to_hex("quokkas".encode("utf-8"))
     performerAddress = account.address
 
     # Build the JSON-RPC payload, now including the hardware validation output.

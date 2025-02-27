@@ -1,8 +1,9 @@
 require('dotenv').config();
 const dalService = require("./dal.service");
+const crypto = require('crypto');
 const oracleService = require("./oracle.service");
 const gpuMap = require('./gpuMap.json'); 
-async function validate(proofOfTask) {
+async function validate(proofOfTask, sig) {
 
   try {
     /*
@@ -33,7 +34,31 @@ async function validate(proofOfTask) {
     let secureBoot = hwValOutput["Secure Boot"];
     let kernelImageVerified = hwValOutput["Kernel Image Validation"];
     let virtualizationCheck = hwValOutput["Virtualization Check"];
-    
+    let epk = hwValOutput["EPK"];
+    let certificate = hwValOutput["Certificate"];
+    let certCaPath = process.env.VAULT_CACERT;
+    console.log(`CertCaPath: ${certCaPath}`);
+    //FIRST! VALIDATE CERTIFICATE & SIGNATURES WITH SIG, EPK, CERTIFICATE
+    const proofOfTaskString = JSON.stringify(hwValOutput, Object.keys(hwValOutput).sort(), '');
+    const proofOfTaskBytes = Buffer.from(proofOfTaskString, 'utf-8');
+
+    const verifier = crypto.createVerify('SHA256');
+    verifier.update(proofOfTaskBytes);
+    const signatureBuffer = Buffer.from(sig, 'hex');
+    const publicKey = crypto.createPublicKey(epk);
+    const isValid = verifier.verify(publicKey, signatureBuffer);
+    console.log(`publicKey: ${publicKey}`);
+    console.log(`signatureBuffer: ${signatureBuffer}`);
+
+    if (!isValid) {
+      console.log("signature rejected!!!")
+    }
+
+    /*
+    if (validateCertificate(publicKey, certificate, certCaPath)) {
+      console.log("Certificate approved!")
+    }
+      */
 
     //GPu must b nvidia, literally no demand for AMD atm, and god forbid someone tries renting out an Intel
     if (pciVendor != "0x10de") {
@@ -59,7 +84,6 @@ async function validate(proofOfTask) {
 
     //check kernel module tainting... might move to yellow flags tbh, esp if gpu name matches pciid
     if (kernelModuleCheck != "true") {
-      isApproved = false;
       console.log("kernel tainted! High likelihood of somebody spoofing their device ID");
     }
 
@@ -90,6 +114,30 @@ async function validate(proofOfTask) {
     return false;
   }
 }
+
+/*
+function validateCertificate(epkPem, certificatePem, trustedCaCertPem) {
+  const cert = new X509Certificate(certificatePem);
+
+  const certPublicKey = cert.publicKey;
+
+  // Convert the provided ephemeral public key PEM into a KeyObject
+  const epkObject = createPublicKey(epkPem);
+
+  // Export both public keys to a canonical PEM format (SPKI)
+  const certPubKeyPem = certPublicKey.export({ type: 'spki', format: 'pem' });
+  const epkNormalizedPem = epkObject.export({ type: 'spki', format: 'pem' });
+
+  // Compare the two PEM strings
+  if (certPubKeyPem.trim() !== epkNormalizedPem.trim()) {
+    console.log("Certificate validation failed!");
+    return false;
+  }
+  console.log("Certificate validation complete!");
+    
+  return true;
+}
+*/
 
 module.exports = {
   validate,
