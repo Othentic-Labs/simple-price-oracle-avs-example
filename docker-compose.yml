@@ -132,40 +132,6 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.6
-        
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml  # Bind mount the config file
-    ports:
-      - "9090:9090"  # Expose Prometheus on port 9090
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yaml'  # Specify the config file location
-    restart: unless-stopped
-    networks:
-      p2p:
-        ipv4_address: 10.8.0.102
-  
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - '3000:3000'
-    networks:
-      p2p:
-        ipv4_address: 10.8.0.103
-    environment:
-    - GF_SECURITY_ADMIN_USER=admin
-    - GF_SECURITY_ADMIN_PASSWORD=admin #Here you can set the password for the admin user
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-      - grafana-storage:/var/lib/grafana
-
-volumes:
-  grafana-storage: {}
 
 networks:
   p2p:

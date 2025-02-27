@@ -58,10 +58,9 @@ def sign_csr_with_vault(csr_pem):
 
 def hwValBash():
     
-    #For once hwval is done
-    """
+    
     try:
-        output = subprocess.check_output(["sudo ./devil.sh"], universal_newlines=True).strip()
+        output = json.loads(subprocess.check_output(["sudo", "./TasmanianDevil"], universal_newlines=True))
     except Exception as e:
         output = f"hw_validation_error: {str(e)}"
     print("Running ur worst nightmare: ", output)
@@ -83,7 +82,9 @@ def hwValBash():
     "Kernel Image Validation": "pass",
     "Virtualization Check": "pass"
     }
+    
     return output
+    """
 
 
 def publishDataToIpfs(data):
@@ -182,7 +183,7 @@ def sendTask():
     """
 
     #TEST ON LOCALHSOT ONLY: REMOVE THIS WHEN/IF HOLESKY BACK UP
-    rpcBaseAddy = "http://localhost:4002/task/validate"
+    rpcBaseAddy = "http://localhost:4003/task/execute"
     
     w3 = Web3(Web3.HTTPProvider(rpcBaseAddy))
     response = w3.manager.request_blocking(

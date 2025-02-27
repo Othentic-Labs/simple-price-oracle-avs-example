@@ -5,14 +5,15 @@ var ipfsHost='';
 
 function init() {
   ipfsHost = process.env.IPFS_HOST;
+  console.log(`ipfs host: ${ipfsHost}`);
 }
 
 
 async function getIPfsTask(cid) {
-    const { data } = await axios.get(ipfsHost + cid);
+    const response = await axios.get(ipfsHost + cid);
+    console.log("gpuData retrieved from ipfs")
     return {
-      symbol: data.symbol,
-      price: parseFloat(data.price),
+      gpuData: response.data
     };
   }  
   

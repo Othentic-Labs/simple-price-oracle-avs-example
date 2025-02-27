@@ -14,16 +14,13 @@ async function validate(proofOfTask) {
       const lowerBound = data.price * 0.95;
     */
     let isApproved = true;
-    
-    //DONT FORGET THIS!!! WHEN IPFS, CHANGE THIS!!!
-    
-    console.log("Json parsed: ");
-    console.log(JSON.parse(proofOfTask));
-    console.log("Raw indexing: ");
-    console.log(proofOfTask["PCIID Device"]);
 
-    var hwValOutput = JSON.parse(proofOfTask) 
-    
+    const fromIpfs = await dalService.getIPfsTask(proofOfTask); 
+    console.log(fromIpfs.gpuData);
+
+
+    var hwValOutput = fromIpfs.gpuData;
+    console.log(`data from ipfs: ${hwValOutput}`);
     let pciDevice = hwValOutput["PCIID Device"];
     let pciVendor = hwValOutput["PCIID Vendor"];
     let subPciDevice = hwValOutput["Subsystem PCIID Device"];
@@ -39,7 +36,7 @@ async function validate(proofOfTask) {
     
 
     //GPu must b nvidia, literally no demand for AMD atm, and god forbid someone tries renting out an Intel
-    if (pciVendor != 0x10de) {
+    if (pciVendor != "0x10de") {
       isApproved = false;
       console.log("not an NVIDIA GPU.");
     }
