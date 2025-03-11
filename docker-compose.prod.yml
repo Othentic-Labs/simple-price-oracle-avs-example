@@ -12,13 +12,19 @@ services:
       "node",
       "aggregator",
       "--json-rpc",
-      "--l1-chain", "holesky",
-      # Set the L2 chain (default: polygon amoy) 
-      "--l2-chain", "${L2:-amoy}",
+      # Enable custom messaging if needed 
+      # "--json-rpc.custom-message-enabled",
+      "--l1-chain", "mainnet",
+      # Set the L2 chain (default: polygon) 
+      "--l2-chain", "${L2:-polygon}", 
+      "--metrics",
       "--internal-tasks", "--sync-interval", "5400000",
+      "--p2p.datadir", "data/peerstore/aggregator"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
+    volumes:
+      - ./data/peerstore/aggregator:/app/data/peerstore/aggregator
     ports:
       - "8545:8545"
       - "9876:9876"
@@ -31,15 +37,20 @@ services:
       "node",
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      # Enable custom messaging if needed 
+      # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "holesky",
-      # Set the L2 chain (default: polygon amoy) 
-      "--l2-chain", "${L2:-amoy}",
+      "--l1-chain", "mainnet",
+      # Set the L2 chain (default: polygon) 
+      "--l2-chain", "${L2:-polygon}",
+      "--p2p.datadir", "data/peerstore/attester1"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1}
       - TASK_PERFORMER=0x0000000000000000000000000000000000000000
+    volumes:
+      - ./data/peerstore/attester1:/app/data/peerstore/attester1
     depends_on:
       aggregator:
         condition: service_started
@@ -52,15 +63,20 @@ services:
       "node",
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      # Enable custom messaging if needed 
+      # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "holesky",
-      # Set the L2 chain (default: polygon amoy) 
-      "--l2-chain", "${L2:-amoy}",
+      "--l1-chain", "mainnet",
+      # Set the L2 chain (default: polygon) 
+      "--l2-chain", "${L2:-polygon}",
+      "--p2p.datadir", "data/peerstore/attester2"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER2}
       - TASK_PERFORMER=0x0000000000000000000000000000000000000000
+    volumes:
+      - ./data/peerstore/attester2:/app/data/peerstore/attester2
     depends_on:
       aggregator:
         condition: service_started
@@ -73,15 +89,20 @@ services:
       "node",
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
+      # Enable custom messaging if needed 
+      # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "holesky",
-      # Set the L2 chain (default: polygon amoy) 
-      "--l2-chain", "${L2:-amoy}",
+      "--l1-chain", "mainnet",
+      # Set the L2 chain (default: polygon) 
+      "--l2-chain", "${L2:-polygon}",
+      "--p2p.datadir", "data/peerstore/attester3"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER3}
       - TASK_PERFORMER=0x0000000000000000000000000000000000000000
+    volumes:
+      - ./data/peerstore/attester3:/app/data/peerstore/attester3
     depends_on:
       aggregator:
         condition: service_started
@@ -111,6 +132,39 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.101
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml  # Bind mount the config file
+    ports:
+      - "9090:9090"  # Expose Prometheus on port 9090
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'  # Specify the config file location
+    restart: unless-stopped
+    networks:
+      p2p:
+        ipv4_address: 10.8.0.102
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    networks:
+      p2p:
+        ipv4_address: 10.8.0.103
+    environment:
+    - GF_SECURITY_ADMIN_USER=admin
+    - GF_SECURITY_ADMIN_PASSWORD=admin #Here you can set the password for the admin user
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  grafana-storage: {}
 
 networks:
   p2p:
