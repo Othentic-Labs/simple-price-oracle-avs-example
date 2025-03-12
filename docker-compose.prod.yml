@@ -17,8 +17,8 @@ services:
       "--l1-chain", "mainnet",
       # Set the L2 chain (default: polygon) 
       "--l2-chain", "${L2:-polygon}", 
-      "--metrics",
       "--internal-tasks", "--sync-interval", "5400000",
+      "--metrics",
       "--p2p.datadir", "data/peerstore/aggregator"
     ]
     environment:
@@ -38,12 +38,14 @@ services:
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       # Enable custom messaging if needed 
+      # "--json-rpc",
       # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "mainnet",
       # Set the L2 chain (default: polygon) 
       "--l2-chain", "${L2:-polygon}",
+      "--metrics",
       "--p2p.datadir", "data/peerstore/attester1"
     ]
     environment:
@@ -64,12 +66,14 @@ services:
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       # Enable custom messaging if needed 
+      # "--json-rpc",
       # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "mainnet",
       # Set the L2 chain (default: polygon) 
       "--l2-chain", "${L2:-polygon}",
+      "--metrics",
       "--p2p.datadir", "data/peerstore/attester2"
     ]
     environment:
@@ -90,12 +94,14 @@ services:
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       # Enable custom messaging if needed 
+      # "--json-rpc",
       # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
       "--l1-chain", "mainnet",
       # Set the L2 chain (default: polygon) 
       "--l2-chain", "${L2:-polygon}",
+      "--metrics",
       "--p2p.datadir", "data/peerstore/attester3"
     ]
     environment:
