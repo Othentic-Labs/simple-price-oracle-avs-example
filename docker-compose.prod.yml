@@ -23,8 +23,10 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
+      - LOG_DIR=data/logs/aggregator
     volumes:
       - ./data/peerstore/aggregator:/app/data/peerstore/aggregator
+      - ./data/logs/aggregator:/app/data/logs/aggregator
     ports:
       - "8545:8545"
       - "9876:9876"
@@ -50,8 +52,10 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1}
+      - LOG_DIR=data/logs/attester1
     volumes:
       - ./data/peerstore/attester1:/app/data/peerstore/attester1
+      - ./data/logs/attester1:/app/logs/peerstore/attester1
     depends_on:
       aggregator:
         condition: service_started
@@ -77,8 +81,10 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER2}
+      - LOG_DIR=data/logs/attester2
     volumes:
       - ./data/peerstore/attester2:/app/data/peerstore/attester2
+      - ./data/logs/attester2:/app/logs/peerstore/attester2
     depends_on:
       aggregator:
         condition: service_started
@@ -104,8 +110,10 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER3}
+      - LOG_DIR=data/logs/attester3
     volumes:
       - ./data/peerstore/attester3:/app/data/peerstore/attester3
+      - ./data/logs/attester3:/app/logs/peerstore/attester3
     depends_on:
       aggregator:
         condition: service_started
