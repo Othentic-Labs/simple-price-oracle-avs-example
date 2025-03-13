@@ -6,6 +6,7 @@ const { getSigningKey, sign } = require('./utils/mcl');
 var pinataApiKey='';
 var pinataSecretApiKey='';
 var rpcBaseAddress='';
+var performerAddress='';
 var privateKey='';
 
 
@@ -14,13 +15,11 @@ function init() {
   pinataApiKey = process.env.PINATA_API_KEY;
   pinataSecretApiKey = process.env.PINATA_SECRET_API_KEY;
   rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS;
+  performerAddress = process.env.PERFORMER_ADDRESS;
   privateKey = process.env.PRIVATE_KEY_PERFORMER;
 }
 
 async function sendTask(proofOfTask, data, taskDefinitionId) {
-
-  var wallet = new ethers.Wallet(privateKey);
-  var performerAddress = wallet.address;
 
   data = ethers.hexlify(ethers.toUtf8Bytes(data));
   const message = ethers.AbiCoder.defaultAbiCoder().encode(["string", "bytes", "address", "uint16"], [proofOfTask, data, performerAddress, taskDefinitionId]);
