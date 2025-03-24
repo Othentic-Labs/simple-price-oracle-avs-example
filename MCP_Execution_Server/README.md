@@ -5,7 +5,7 @@ The AVS MCP server acts as a bridge between the MCP client and the AVS network, 
 ## Usage with Claude Desktop
 1. Ensure the AVS network is running
 
-Make sure your AVS network is up and running before proceeding. Check the [Quickstart Guide]() to run an AVS network.
+Make sure your AVS network is up and running before proceeding. Check the [Quickstart Guide](https://docs.othentic.xyz/main/avs-framework/quick-start) to run an AVS network.
 
 2. Build the MCP server
 
