@@ -102,7 +102,6 @@ server.tool(
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const res = (await response.json()).price;
-      console.log(res)
 
       return {
         content: [
