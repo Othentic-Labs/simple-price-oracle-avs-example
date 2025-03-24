@@ -3,7 +3,6 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { ethers } from 'ethers';
 import dotenv from 'dotenv'
-import { GetPromptRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 dotenv.config();
 
 var rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS ?? "http://localhost:8545";
@@ -74,7 +73,7 @@ server.prompt("send-task", async (request: any) => {
         role: "tool",
         name: "send-task",
         input: {
-          proofOfTask: "2,092.50",
+          price: "2,092.50",
           data: "Price validation request"
         }
       }
@@ -152,7 +151,6 @@ async function sendTask(proofOfTask: string, data: string, taskDefinitionId: any
   try {
     const provider = new ethers.JsonRpcProvider(rpcBaseAddress);
     const response = await provider.send(jsonRpcBody.method, jsonRpcBody.params);
-    console.log("API response:", response);
   } catch (error) {
     console.error("Error making API request:", error);
   }
@@ -162,12 +160,12 @@ server.tool(
   "send-task",
   "Send Task for validation to the AVS network",
   {
-    proofOfTask: z.string().describe("prood of task"),
+    price: z.string().describe("prood of task"),
     data: z.string().describe("additional data"),
   },
-  async ({ proofOfTask, data }) => {
+  async ({ price, data }) => {
     try {
-      await sendTask(proofOfTask, data, 0)
+      await sendTask(price, data, 0)
 
       return {
         content: [
