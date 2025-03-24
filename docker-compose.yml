@@ -94,20 +94,6 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.42
-  # execution-service:
-  #   build:
-  #     context: ./Execution_Service
-  #     dockerfile: ./Dockerfile
-  #   environment:
-  #     - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
-  #     - PRIVATE_KEY=${PRIVATE_KEY_PERFORMER}
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "4003:4003"
-  #   networks:
-  #     p2p:
-  #       ipv4_address: 10.8.0.101
 
 networks:
   p2p:
