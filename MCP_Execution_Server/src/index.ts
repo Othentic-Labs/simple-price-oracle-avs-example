@@ -3,10 +3,14 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { ethers } from 'ethers';
 import dotenv from 'dotenv'
+import pinataSDK from "@pinata/sdk"
+
 dotenv.config();
 
 var rpcBaseAddress = process.env.OTHENTIC_CLIENT_RPC_ADDRESS ?? "http://localhost:8545";
 var privateKey = process.env.PRIVATE_KEY_PERFORMER;
+var pinataApiKey = process.env.PINATA_API_KEY ?? '7824585a98fe36414d68';
+var pinataSecretApiKey = process.env.PINATA_SECRET_API_KEY ?? '41a53a837879721969e73008d91180df30dbc66097c7f75f08cd5489176b43ea';
 
 const USER_AGENT = "binance-app/1.0";
 
@@ -126,8 +130,25 @@ server.tool(
   },
 );
 
+async function publishJSONToIpfs(data: any) {
+  var proofOfTask = '';
+  try {   
+    //@ts-ignore
+    const pinata = new pinataSDK(pinataApiKey, pinataSecretApiKey);
+    const response = await pinata.pinJSONToIPFS(data);
+    proofOfTask = response.IpfsHash;
+    console.log(`proofOfTask: ${proofOfTask}`);
+  }
+  catch (error) {  
+    console.error("Error making API request to pinataSDK:", error);
+  }
+  return proofOfTask;
+}
+
 async function sendTask(proofOfTask: string, data: string, taskDefinitionId: any) {
 
+  const result = {price: parseFloat(proofOfTask)}
+  await publishJSONToIpfs(result)
   var wallet = new ethers.Wallet(privateKey ?? "");
   var performerAddress = wallet.address;
 
