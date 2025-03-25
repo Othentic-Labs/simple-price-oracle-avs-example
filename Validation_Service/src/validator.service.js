@@ -5,7 +5,7 @@ const oracleService = require("./oracle.service");
 async function validate(proofOfTask) {
 
   try {
-      const taskResult = parseFloat(proofOfTask);
+      const taskResult = await dalService.getIPfsTask(proofOfTask);
       var data = await oracleService.getPrice("ETHUSDT");
       const upperBound = data.price * 1.05;
       const lowerBound = data.price * 0.95;
