@@ -1,6 +1,6 @@
 ## AVS MCP Server
 
-The AVS MCP server acts as a bridge between the MCP client and the AVS network, enabling you to trigger AVS Tasks. It includes functionality to fetch the `ETHUSDT` price and call the `sendTask` RPC method.
+The AVS MCP server acts as an interface between the AI Agents and the AVS network, enabling you to execute any AVS Tasks. It includes functionality to fetch the `ETHUSDT` price and call the `sendTask` RPC method.
 
 ## Usage with Claude Desktop
 1. Ensure the AVS network is running
