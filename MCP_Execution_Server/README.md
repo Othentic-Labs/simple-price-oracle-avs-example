@@ -1,8 +1,8 @@
 ## AVS MCP Server
 
-The AVS MCP server acts as an interface between the AI Agents and the AVS network, enabling you to execute any AVS Tasks. It includes functionality to fetch the `ETHUSDT` price and call the `sendTask` RPC method.
+The AVS MCP server acts as an interface between the AI Agents and the AVS network, enabling you to execute any AVS Tasks. The following MCP server includes functionality to fetch the `ETHUSDT` price and call the `sendTask` RPC method to trigger the AVS [Task](https://docs.othentic.xyz/main/avs-framework/othentic-consensus/task-and-task-definitions#task).
 
-## Usage with Claude Desktop
+## Usage with Claude Desktop 
 1. Ensure the AVS network is running
 
 Make sure your AVS network is up and running before proceeding. Check the [Quickstart Guide](https://docs.othentic.xyz/main/avs-framework/quick-start) to run an AVS network.
@@ -44,5 +44,9 @@ You can use the following prompts to interact with the AVS MCP server:
 
 ```bash
 can you get the price of ETHUSDT?
-can you validate this proof of task 2077.14 using AVS network?
+can you validate this price using AVS network?
 ```
+
+5. Verify the On-Chain Transaction
+Check the on-chain transaction in the Attestation Center contract to confirm execution within the AVS network.
+
