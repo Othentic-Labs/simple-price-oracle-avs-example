@@ -10,7 +10,7 @@ async function validate(proofOfTask) {
       const upperBound = data.price * 1.05;
       const lowerBound = data.price * 0.95;
       let isApproved = true;
-      if (taskResult > upperBound || taskResult < lowerBound) {
+      if (taskResult.price > upperBound || taskResult.price < lowerBound) {
         isApproved = false;
       }
       return isApproved;
