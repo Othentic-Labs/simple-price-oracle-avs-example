@@ -12,6 +12,8 @@ Make sure your AVS network is up and running before proceeding. Check the [Quick
 Run the following command to compile the server:
 
 ```bash
+cd MCP_Execution_Server
+npm i
 npm run build
 ```
 
