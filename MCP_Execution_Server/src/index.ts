@@ -137,7 +137,6 @@ async function publishJSONToIpfs(data: any) {
     const pinata = new pinataSDK(pinataApiKey, pinataSecretApiKey);
     const response = await pinata.pinJSONToIPFS(data);
     proofOfTask = response.IpfsHash;
-    console.log(`proofOfTask: ${proofOfTask}`);
   }
   catch (error) {  
     console.error("Error making API request to pinataSDK:", error);
@@ -145,10 +144,10 @@ async function publishJSONToIpfs(data: any) {
   return proofOfTask;
 }
 
-async function sendTask(proofOfTask: string, data: string, taskDefinitionId: any) {
+async function sendTask(price: string, data: string, taskDefinitionId: any) {
 
-  const result = {price: parseFloat(proofOfTask)}
-  await publishJSONToIpfs(result)
+  const result = {price: parseFloat(price)}
+  const proofOfTask = await publishJSONToIpfs(result)
   var wallet = new ethers.Wallet(privateKey ?? "");
   var performerAddress = wallet.address;
 
