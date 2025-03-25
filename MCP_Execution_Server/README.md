@@ -1,8 +1,21 @@
-## AVS MCP Server
+# AVS MCP Server
 
 The AVS MCP server acts as an interface between the AI Agents and the AVS network, enabling you to execute any AVS Tasks. The following MCP server includes functionality to fetch the `ETHUSDT` price and call the `sendTask` RPC method to trigger the AVS [Task](https://docs.othentic.xyz/main/avs-framework/othentic-consensus/task-and-task-definitions#task).
 
-## Usage with Claude Desktop 
+## Components
+### Tools  
+
+- **get-price**: Fetches the price of a cryptocurrency pair using the Binance API.  
+  - **Input:**  
+    - `pair` (string): The name of the cryptocurrency pair (e.g., `ETHUSDT`).  
+
+- **send-task**  
+  - **Input:**  
+    - `price` (string): Price of the pair.  
+    - `data` (string): Any additional data.  
+
+
+## Usage with Claude Desktop
 1. Ensure the AVS network is running
 
 Make sure your AVS network is up and running before proceeding. Check the [Quickstart Guide](https://docs.othentic.xyz/main/avs-framework/quick-start) to run an AVS network.
@@ -18,6 +31,8 @@ npm run build
 ```
 
 3. Add the following to your claude_desktop_config.json:
+   
+Follow the detailed guide [here](https://modelcontextprotocol.io/quickstart/user) on Claude Desktop Configuration.
 
 Note: Replace `ADD_ABSOLUTE_PATH` and `YOUR_PERFORMER_PRIVATE_KEY_HERE` with the actuals
 
