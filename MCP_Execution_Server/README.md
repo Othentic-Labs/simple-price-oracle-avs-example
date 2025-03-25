@@ -48,5 +48,6 @@ can you validate this price using AVS network?
 ```
 
 5. Verify the On-Chain Transaction
+
 Check the on-chain transaction in the Attestation Center contract to confirm execution within the AVS network.
 
