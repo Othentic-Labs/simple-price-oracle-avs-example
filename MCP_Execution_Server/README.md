@@ -16,13 +16,13 @@ The AVS MCP server acts as an interface between the AI Agents and the AVS networ
 
 
 ## Usage with Claude Desktop
-1. Ensure the AVS network is running
+1. **Ensure the AVS Network is running**
 
-Make sure your AVS network is up and running before proceeding. Check the [Quickstart Guide](https://docs.othentic.xyz/main/avs-framework/quick-start) to run an AVS network.
+Make sure your AVS network is up and running before proceeding. Refer to the [Quickstart Guide](https://docs.othentic.xyz/main/avs-framework/quick-start) for instructions on running an AVS network.
 
-2. Build the MCP server
+2. **Build the MCP server**
 
-Run the following command to compile the server:
+Run the following commands to compile the server:
 
 ```bash
 cd MCP_Execution_Server
@@ -30,11 +30,11 @@ npm i
 npm run build
 ```
 
-3. Add the following to your claude_desktop_config.json:
+3. **Configure Claude Desktop**
    
-Follow the detailed guide [here](https://modelcontextprotocol.io/quickstart/user) on Claude Desktop Configuration.
+Add the configuration for the MCP Server in your `claude_desktop_config.json` file. Detailed instructions are available in the Claude Desktop [Configuration Guide](https://modelcontextprotocol.io/quickstart/user).
 
-Note: Replace `ADD_ABSOLUTE_PATH` and `YOUR_PERFORMER_PRIVATE_KEY_HERE` with the actuals
+Replace `ADD_ABSOLUTE_PATH` and `YOUR_PERFORMER_PRIVATE_KEY_HERE` with the appropriate values:
 
 ```JSON
 {
@@ -53,16 +53,16 @@ Note: Replace `ADD_ABSOLUTE_PATH` and `YOUR_PERFORMER_PRIVATE_KEY_HERE` with the
 }
 ```
 
-4. Sample Prompts
-
-You can use the following prompts to interact with the AVS MCP server:
+4. **Sample Prompts**
+   
+You can interact with the AVS MCP Server using prompts such as:
 
 ```bash
 can you get the price of ETHUSDT?
 can you validate this price using AVS network?
 ```
 
-5. Verify the On-Chain Transaction
+5. **Verify the On-Chain Transaction**
 
 Check the on-chain transaction in the Attestation Center contract to confirm execution within the AVS network.
 
