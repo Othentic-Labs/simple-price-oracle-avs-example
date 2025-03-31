@@ -1,11 +1,12 @@
 "use strict";
-const { Router } = require("express")
+const { Router } = require("express");
 const CustomError = require("./utils/validateError");
 const CustomResponse = require("./utils/validateResponse");
 const oracleService = require("./oracle.service");
 const dalService = require("./dal.service");
+const axios = require("axios");
 
-const router = Router()
+const router = Router();
 
 router.post("/execute", async (req, res) => {
     console.log("Executing task");
@@ -26,5 +27,28 @@ router.post("/execute", async (req, res) => {
     }
 })
 
+router.post("/elect", async (req, res) => {
+    try {
+        await publishTask("auction/start", { auctionId: 12 });
+        return res.status(200).send(new CustomResponse({ auctionId: 12 }, "Task executed successfully"));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(new CustomError("Something went wrong", {}));
+    }
+});
 
-module.exports = router
+async function publishTask(topic, taskData) {
+    taskData.topic = topic;
+    const jsonData = JSON.stringify(taskData);
+    const rpcUrl = process.env.OTHENTIC_CLIENT_RPC_ADDRESS; // Replace with actual RPC server URL
+    const hexData = Buffer.from(jsonData, "utf8").toString("hex");
+    const payload = {
+        jsonrpc: "2.0",
+        method: "sendCustomMessage",
+        params: [`0x${hexData}`],
+        id: 1,
+    };
+    await axios.post(rpcUrl, payload);
+}
+
+module.exports = router;

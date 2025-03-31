@@ -13,9 +13,10 @@ services:
       "aggregator",
       "--json-rpc",
       "--l1-chain", "holesky",
+      "--json-rpc.custom-message-enabled",
       # Set the L2 chain
       "--l2-chain", "amoy",
-      "--internal-tasks", "--sync-interval", "5400000",
+      # "--internal-tasks", "--sync-interval", "5400000",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
@@ -30,6 +31,8 @@ services:
     command: [
       "node",
       "attester",
+      "--json-rpc",
+      "--json-rpc.custom-message-enabled",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
@@ -50,6 +53,8 @@ services:
     command: [
       "node",
       "attester",
+      "--json-rpc",
+      "--json-rpc.custom-message-enabled",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
@@ -70,6 +75,8 @@ services:
     command: [
       "node",
       "attester",
+      "--json-rpc",
+      "--json-rpc.custom-message-enabled",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
@@ -89,6 +96,9 @@ services:
     build:
       context: ./Validation_Service
       dockerfile: ./Dockerfile
+    environment:
+      - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
+      - PRIVATE_KEY=${PRIVATE_KEY_PERFORMER}
     env_file:
       - .env
     networks:
