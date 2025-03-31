@@ -29,7 +29,7 @@ router.post("/execute", async (req, res) => {
 
 router.post("/elect", async (req, res) => {
     try {
-        await publishTask("auction/start", { auctionId: 12 });
+        await publishTask("auction/start", { auctionId: 12, startTime: Date.now() });
         return res.status(200).send(new CustomResponse({ auctionId: 12 }, "Task executed successfully"));
     } catch (error) {
         console.log(error);

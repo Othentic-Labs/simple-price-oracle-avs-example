@@ -8,6 +8,9 @@ const commitments = new Map(); // { nodeId: { commitment, salt, bid } }
 const revealedBids = new Map(); // { nodeId: { bid, salt } }
 const nodeAccount = new ethers.Wallet(process.env.PRIVATE_KEY); // The signing key for performing tasks
 
+const COMMIT_DURATION = 5000
+const REVEAL_DURATION = 10000
+
 const router = Router()
 
 async function commitBid(nodeId, bid) {
@@ -41,6 +44,7 @@ function verifyBid(nodeId, bid, salt, commitment) {
 }
 
 async function determineWinner() {
+    console.log("Revealed Bids", revealedBids);
     let highestBid = 0;
     let winnerNodeId = null;
 
@@ -63,7 +67,6 @@ async function determineWinner() {
 }
 
 async function publishTask(topic, taskData) {
-    console.log("abs")
     taskData.topic = topic;
     const jsonData = JSON.stringify(taskData);
     const rpcUrl = process.env.OTHENTIC_CLIENT_RPC_ADDRESS; // Replace with actual RPC server URL
@@ -78,12 +81,12 @@ async function publishTask(topic, taskData) {
 }
 
 async function handleAuctionStart(msg) {
-    if (!msg.auctionId) {
-        console.log("[Error] Auction ID is missing.");
+    if (!msg.auctionId || !msg.startTime) {
+        console.log("[Error] Auction ID or Start Time is missing.");
         return;
     }
-
-    console.log(`[Node] Received auction start event: ${msg.auctionId}`);
+    const auctionStartTime = msg.startTime;
+    console.log(`[Node] Auction ${msg.auctionId} started at ${new Date(auctionStartTime).toISOString()}`);
   
     const myBid = Math.floor(Math.random() * 200);
     await commitBid(nodeAccount.address, myBid);
@@ -97,8 +100,8 @@ async function handleAuctionStart(msg) {
         setTimeout(() => {
             console.log(`[Node] Determining winner...`);
             determineWinner();
-        }, 10000);
-    }, 5000);
+        }, auctionStartTime + COMMIT_DURATION + REVEAL_DURATION - Date.now());
+    }, auctionStartTime + COMMIT_DURATION - Date.now());
 }
 
 router.post("/message", async (req, res) => {
