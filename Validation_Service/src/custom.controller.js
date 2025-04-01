@@ -8,8 +8,13 @@ const commitments = new Map(); // { nodeId: { commitment, salt, bid } }
 const revealedBids = new Map(); // { nodeId: { bid, salt } }
 const nodeAccount = new ethers.Wallet(process.env.PRIVATE_KEY); // The signing key for performing tasks
 
-const COMMIT_DURATION = 5000
-const REVEAL_DURATION = 10000
+const COMMIT_DURATION = 5000;
+const REVEAL_DURATION = 10000;
+
+const AUCTION_START = "auction/start";
+const AUCTION_BID_COMMIT = "auction/bid_commit";
+const AUCTION_BID_REVEAL = "auction/bid_reveal";
+const AUCTION_RESULT = "auction/result";
 
 const router = Router()
 
@@ -18,7 +23,7 @@ async function commitBid(nodeId, bid) {
     const commitment = generateCommitment(bid, salt);
 
     commitments.set(nodeId, { commitment, salt, bid });
-    await publishTask("auction/bid_commit", { nodeId, commitment });
+    await publishTask(AUCTION_BID_COMMIT, { nodeId, commitment });
     console.log(`[${nodeId}] Committed bid: ${bid}, Salt: ${salt}`);
 }
 
@@ -31,7 +36,7 @@ async function revealBid(nodeId) {
     }
 
     const { bid, salt } = bidData;
-    await publishTask("auction/bid_reveal", { nodeId, bid, salt });
+    await publishTask(AUCTION_BID_REVEAL, { nodeId, bid, salt });
     console.log(`[${nodeId}] Revealed bid: ${bid}, Salt: ${salt}`);
 }
 
@@ -59,7 +64,7 @@ async function determineWinner() {
     }
 
     if (winnerNodeId) {
-        await publishTask("auction/result", { winnerNodeId, highestBid });
+        await publishTask(AUCTION_RESULT, { winnerNodeId, highestBid });
         console.log(`[RESULT] Winner: ${winnerNodeId} with bid: ${highestBid}`);
     } else {
         console.log("[RESULT] No valid bids found");
@@ -112,10 +117,10 @@ router.post("/message", async (req, res) => {
     const parsedData = JSON.parse(jsonData);
 
     switch (parsedData.topic) {
-        case "auction/start":
+        case AUCTION_START:
             await handleAuctionStart(parsedData);
             break;
-        case "auction/bid_commit":
+        case AUCTION_BID_COMMIT:
             if (commitments.has(parsedData.nodeId)) {
                 console.log(`[Warn] Node ${parsedData.nodeId} has already committed a bid.`);
                 return;
@@ -123,11 +128,11 @@ router.post("/message", async (req, res) => {
             console.log(`[Commit Received] Node: ${parsedData.nodeId}, Commitment: ${parsedData.commitment}`);
             commitments.set(parsedData.nodeId, { commitment: parsedData.commitment });
             break;
-        case "auction/bid_reveal":
+        case AUCTION_BID_REVEAL:
             console.log(`[Reveal Received] Node: ${parsedData.nodeId}, Bid: ${parsedData.bid}, Salt: ${parsedData.salt}`);
             revealedBids.set(parsedData.nodeId, { bid: parsedData.bid, salt: parsedData.salt });
             break;
-        case "auction/result":
+        case AUCTION_RESULT:
             console.log(`[Winner declared] Node: ${parsedData.winnerNodeId} with Bid: ${parsedData.highestBid}`);
             if(parsedData.winnerNodeId === nodeAccount.address) {
 

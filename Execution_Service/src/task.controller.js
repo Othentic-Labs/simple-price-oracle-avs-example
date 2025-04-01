@@ -7,6 +7,7 @@ const dalService = require("./dal.service");
 const axios = require("axios");
 
 const router = Router();
+const AUCTION_START = "auction/start";
 
 router.post("/execute", async (req, res) => {
     console.log("Executing task");
@@ -29,7 +30,7 @@ router.post("/execute", async (req, res) => {
 
 router.post("/elect", async (req, res) => {
     try {
-        await publishTask("auction/start", { auctionId: 12, startTime: Date.now() });
+        await publishTask(AUCTION_START, { auctionId: 12, startTime: Date.now() });
         return res.status(200).send(new CustomResponse({ auctionId: 12 }, "Task executed successfully"));
     } catch (error) {
         console.log(error);
