@@ -46,7 +46,7 @@ function parseFr(hex) {
 }
 
 function prefixSeed(seed) {
-    return `0x${seed}`;
+    return seed.startsWith('0x') ? seed : `0x${seed}`;
 }
 
 function hashToPoint(message, domain) {
