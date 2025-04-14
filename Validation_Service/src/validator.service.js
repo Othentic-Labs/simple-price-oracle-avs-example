@@ -1,11 +1,12 @@
 require('dotenv').config();
-const dalService = require("./dal.service");
+const loadNetwork = require("./loadnetwork.service");
 const oracleService = require("./oracle.service");
+loadNetwork.init();
 
 async function validate(proofOfTask) {
 
   try {
-      const taskResult = await dalService.getIPfsTask(proofOfTask);
+      const taskResult = await loadNetwork.getBundlerTask(proofOfTask);
       var data = await oracleService.getPrice("ETHUSDT");
       const upperBound = data.price * 1.05;
       const lowerBound = data.price * 0.95;
