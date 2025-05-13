@@ -17,7 +17,7 @@ services:
       "--l1-chain", "mainnet",
       # Set the L2 chain 
       "--l2-chain", "base", 
-      "--internal-tasks", "--sync-interval", "5400000",
+      "--internal-tasks",
       "--metrics",
       "--p2p.datadir", "data/peerstore/aggregator"
     ]

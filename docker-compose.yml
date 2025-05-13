@@ -15,7 +15,7 @@ services:
       "--l1-chain", "holesky",
       # Set the L2 chain
       "--l2-chain", "amoy",
-      "--internal-tasks", "--sync-interval", "5400000",
+      "--internal-tasks"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
