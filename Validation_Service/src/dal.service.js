@@ -4,7 +4,7 @@ const axios = require("axios");
 var ipfsHost='';
 
 function init() {
-  ipfsHost = process.env.IPFS_HOST;
+  ipfsHost = process.env.PINATA_GATEWAY;
 }
 
 
