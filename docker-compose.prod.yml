@@ -62,6 +62,8 @@ services:
     depends_on:
       aggregator:
         condition: service_started
+    ports:
+      - "3000:3000"
     networks:
       p2p:
         ipv4_address: 10.8.0.2
@@ -94,6 +96,8 @@ services:
     depends_on:
       aggregator:
         condition: service_started
+    ports:
+      - "3000:3000"
     networks:
       p2p:
         ipv4_address: 10.8.0.3
@@ -126,6 +130,8 @@ services:
     depends_on:
       aggregator:
         condition: service_started
+    ports:
+      - "3000:3000"
     networks:
       p2p:
         ipv4_address: 10.8.0.4
