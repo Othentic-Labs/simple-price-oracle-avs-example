@@ -64,6 +64,7 @@ services:
         condition: service_started
     ports:
       - "3000:3000"
+      - "8545:8545"
     networks:
       p2p:
         ipv4_address: 10.8.0.2
@@ -98,6 +99,7 @@ services:
         condition: service_started
     ports:
       - "3000:3000"
+      - "8545:8545"
     networks:
       p2p:
         ipv4_address: 10.8.0.3
@@ -132,6 +134,7 @@ services:
         condition: service_started
     ports:
       - "3000:3000"
+      - "8545:8545"
     networks:
       p2p:
         ipv4_address: 10.8.0.4
