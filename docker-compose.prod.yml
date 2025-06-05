@@ -1,4 +1,3 @@
-version: '3.7'
 x-othentic-cli: &othentic-cli
   env_file:
     - .env
@@ -14,15 +13,14 @@ services:
       "--json-rpc",
       # Enable custom messaging if needed 
       # "--json-rpc.custom-message-enabled",
-      "--l1-chain", "mainnet",
-      # Set the L2 chain 
-      "--l2-chain", "base", 
       "--internal-tasks",
       "--metrics",
       "--p2p.datadir", "data/peerstore/aggregator"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
       - LOG_DIR=data/logs/aggregator
     volumes:
       - ./data/peerstore/aggregator:/app/data/peerstore/aggregator
@@ -44,9 +42,6 @@ services:
       # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "mainnet",
-      # Set the L2 chain 
-      "--l2-chain", "base",
       "--metrics",
       "--p2p.datadir", "data/peerstore/attester1",
       # Setup using https://docs.othentic.xyz/main/avs-framework/othentic-cli/node-operators#features
@@ -55,6 +50,8 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
       - LOG_DIR=data/logs/attester1
     volumes:
       - ./data/peerstore/attester1:/app/data/peerstore/attester1
@@ -79,9 +76,6 @@ services:
       # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "mainnet",
-      # Set the L2 chain 
-      "--l2-chain", "base",
       "--metrics",
       "--p2p.datadir", "data/peerstore/attester2",
       # Setup using https://docs.othentic.xyz/main/avs-framework/othentic-cli/node-operators#features
@@ -90,6 +84,8 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER2}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
       - LOG_DIR=data/logs/attester2
     volumes:
       - ./data/peerstore/attester2:/app/data/peerstore/attester2
@@ -114,9 +110,6 @@ services:
       # "--json-rpc.custom-message-enabled",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "mainnet",
-      # Set the L2 chain 
-      "--l2-chain", "base",
       "--metrics",
       "--p2p.datadir", "data/peerstore/attester3",
       # Setup using https://docs.othentic.xyz/main/avs-framework/othentic-cli/node-operators#features
@@ -125,6 +118,8 @@ services:
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER3}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
       - LOG_DIR=data/logs/attester3
     volumes:
       - ./data/peerstore/attester3:/app/data/peerstore/attester3

@@ -1,4 +1,3 @@
-version: '3.7'
 x-othentic-cli: &othentic-cli
   env_file:
     - .env
@@ -12,13 +11,12 @@ services:
       "node",
       "aggregator",
       "--json-rpc",
-      "--l1-chain", "holesky",
-      # Set the L2 chain
-      "--l2-chain", "amoy",
       "--internal-tasks"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
     ports:
       - "8545:8545"
       - "9876:9876"
@@ -33,12 +31,11 @@ services:
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "holesky",
-      # Set the L2 chain 
-      "--l2-chain", "amoy",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
     depends_on:
       aggregator:
         condition: service_started
@@ -53,12 +50,11 @@ services:
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "holesky",
-      # Set the L2 chain 
-      "--l2-chain", "amoy",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER2}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
     depends_on:
       aggregator:
         condition: service_started
@@ -73,12 +69,11 @@ services:
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
       "http://10.8.0.42",
-      "--l1-chain", "holesky",
-      # Set the L2 chain 
-      "--l2-chain", "amoy",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER3}
+      - L1_CHAIN=${L1_CHAIN}
+      - L2_CHAIN=${L2_CHAIN}
     depends_on:
       aggregator:
         condition: service_started
