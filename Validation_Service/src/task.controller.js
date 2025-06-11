@@ -3,6 +3,7 @@ const { Router } = require("express")
 const CustomError = require("./utils/validateError");
 const CustomResponse = require("./utils/validateResponse");
 const validatorService = require("./validator.service");
+const verifyService = require("./verify.service");
 
 const router = Router()
 
@@ -10,7 +11,8 @@ router.post("/validate", async (req, res) => {
     var proofOfTask = req.body.proofOfTask;
     console.log(`Validate task: proof of task: ${proofOfTask}`);
     try {
-        const result = await validatorService.validate(proofOfTask);
+        const result = await verifyService.verify(proofOfTask);
+        // const result = await validatorService.validate(proofOfTask);
         console.log('Vote:', result ? 'Approve' : 'Not Approved');
         return res.status(200).send(new CustomResponse(result));
     } catch (error) {

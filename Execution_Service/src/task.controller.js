@@ -4,7 +4,7 @@ const CustomError = require("./utils/validateError");
 const CustomResponse = require("./utils/validateResponse");
 const oracleService = require("./oracle.service");
 const dalService = require("./dal.service");
-
+const kycService = require("./kyc.service");
 const router = Router()
 
 router.post("/execute", async (req, res) => {
@@ -13,9 +13,10 @@ router.post("/execute", async (req, res) => {
     try {
         var taskDefinitionId = Number(req.body.taskDefinitionId) || 0;
         console.log(`taskDefinitionId: ${taskDefinitionId}`);
+        const result = await kycService.uploadKycImage();
 
-        const result = await oracleService.getPrice("ETHUSDT");
-        result.price = req.body.fakePrice || result.price;
+        // const result = await oracleService.getPrice("ETHUSDT");
+        // result.price = req.body.fakePrice || result.price;
         const cid = await dalService.publishJSONToIpfs(result);
         const data = "hello";
         await dalService.sendTask(cid, data, taskDefinitionId);

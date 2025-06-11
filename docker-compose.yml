@@ -11,7 +11,7 @@ services:
       "node",
       "aggregator",
       "--json-rpc",
-      "--internal-tasks"
+      # "--internal-tasks"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
