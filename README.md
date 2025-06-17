@@ -105,7 +105,7 @@ Validation Service logic:
 
 ## Usage
 
-Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/avs-framework/quick-start#steps) Guide for setup and deployment.
+Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/welcome/getting-started/install-othentic-cli) Guide for setup and deployment.
 
 ### Next
 Modify the different configurations, tailor the task execution logic as per your use case, and run the AVS.
