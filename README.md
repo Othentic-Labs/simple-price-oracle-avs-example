@@ -105,6 +105,14 @@ Validation Service logic:
 
 ## Usage
 
+### Slashing testing
+
+```
+docker compose -f docker-compose.da.yml up
+docker compose -f docker-compose.rt.yml up
+docker compose -f docker-compose.ia.yml up
+```
+
 Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/welcome/getting-started/install-othentic-cli) Guide for setup and deployment.
 
 ### Next
