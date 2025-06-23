@@ -11,7 +11,8 @@ services:
       "node",
       "aggregator",
       "--json-rpc",
-      "--internal-tasks"
+      "--delay",
+      "120000"
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_AGGREGATOR}
@@ -30,7 +31,7 @@ services:
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
-      "http://10.8.0.42",
+      "http://10.8.0.43",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER1}
@@ -49,7 +50,7 @@ services:
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
-      "http://10.8.0.42",
+      "http://10.8.0.43",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER2}
@@ -68,7 +69,7 @@ services:
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       "--avs-webapi",
-      "http://10.8.0.42",
+      "http://10.8.0.43",
     ]
     environment:
       - PRIVATE_KEY=${PRIVATE_KEY_ATTESTER3}
@@ -84,11 +85,24 @@ services:
     build:
       context: ./Validation_Service
       dockerfile: ./Dockerfile
+    environment:
+      - VALIDATOR_RESULT=true
     env_file:
       - .env
     networks:
       p2p:
         ipv4_address: 10.8.0.42
+  validation-service-false:
+    build:
+      context: ./Validation_Service
+      dockerfile: ./Dockerfile
+    environment:
+      - VALIDATOR_RESULT=false
+    env_file:
+      - .env
+    networks:
+      p2p:
+        ipv4_address: 10.8.0.43
   execution-service:
     build:
       context: ./Execution_Service
