@@ -100,7 +100,8 @@ Validation Service logic:
 2. Install Othentic CLI:
 
    ```bash
-   npm i -g @othentic/othentic-cli
+   npm i -g @othentic/cli
+   npm i -g @othentic/node
    ```
 
 ## Usage
