@@ -1,4 +1,4 @@
-x-othentic-cli: &othentic-cli
+x-otnode: &otnode
   env_file:
     - .env
   build:
@@ -6,9 +6,10 @@ x-othentic-cli: &othentic-cli
     dockerfile: ./Dockerfile
 services:
   aggregator:
-    <<: *othentic-cli
+    <<: *otnode
     command: [
-      "node",
+      "otnode",
+      "run",
       "aggregator",
       "--json-rpc",
       # Enable custom messaging if needed 
@@ -32,9 +33,10 @@ services:
       p2p:
         ipv4_address: 10.8.0.69
   attester-1:
-    <<: *othentic-cli
+    <<: *otnode
     command: [
-      "node",
+      "otnode",
+      "run",
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       # Enable custom messaging if needed 
@@ -44,7 +46,7 @@ services:
       "http://10.8.0.42",
       "--metrics",
       "--p2p.datadir", "data/peerstore/attester1",
-      # Setup using https://docs.othentic.xyz/main/avs-framework/othentic-cli/node-operators#features
+      # Setup using https://docs.othentic.xyz/main/user-guide/operator-management/run-an-attester-node
       "--announced-addresses",
       "/ip4/${ATTESTER1_IP}/tcp/9876/p2p/${PEER_ID}" # Replace Attester IP and its peer id
     ]
@@ -66,9 +68,10 @@ services:
       p2p:
         ipv4_address: 10.8.0.2
   attester-2:
-    <<: *othentic-cli
+    <<: *otnode
     command: [
-      "node",
+      "otnode",
+      "run",
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       # Enable custom messaging if needed 
@@ -78,7 +81,7 @@ services:
       "http://10.8.0.42",
       "--metrics",
       "--p2p.datadir", "data/peerstore/attester2",
-      # Setup using https://docs.othentic.xyz/main/avs-framework/othentic-cli/node-operators#features
+      # Setup using https://docs.othentic.xyz/main/user-guide/operator-management/run-an-attester-node
       "--announced-addresses",
       "/ip4/${ATTESTER2_IP}/tcp/9876/p2p/${PEER_ID}" # Replace Attester IP and its peer id
     ]
@@ -100,9 +103,10 @@ services:
       p2p:
         ipv4_address: 10.8.0.3
   attester-3:
-    <<: *othentic-cli
+    <<: *otnode
     command: [
-      "node",
+      "otnode",
+      "run",
       "attester",
       "/ip4/10.8.0.69/tcp/9876/p2p/${OTHENTIC_BOOTSTRAP_ID}",
       # Enable custom messaging if needed 
@@ -112,7 +116,7 @@ services:
       "http://10.8.0.42",
       "--metrics",
       "--p2p.datadir", "data/peerstore/attester3",
-      # Setup using https://docs.othentic.xyz/main/avs-framework/othentic-cli/node-operators#features
+      # Setup using https://docs.othentic.xyz/main/user-guide/operator-management/run-an-attester-node
       "--announced-addresses",
       "/ip4/${ATTESTER3_IP}/tcp/9876/p2p/${PEER_ID}" # Replace Attester IP and its peer id
     ]
