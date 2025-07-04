@@ -2,6 +2,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const path = require("path");
+require('dotenv').config();
 
 async function uploadKycImage() {
   const form = new FormData();
@@ -10,8 +11,9 @@ async function uploadKycImage() {
   form.append("file", fs.createReadStream(filePath));
 
   try {
-    
-    const response = await axios.post("http://host.docker.internal:8000/api/kyc", form, {
+    var kycServerUrl= process.env.TEE_KYC_SERVER_URL;
+    console.log("kycServerUrl", kycServerUrl);
+    const response = await axios.post(kycServerUrl, form, {
       headers: form.getHeaders(),
       maxContentLength: Infinity,
       maxBodyLength: Infinity,

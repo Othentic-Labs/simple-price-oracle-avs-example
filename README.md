@@ -95,6 +95,7 @@ Validation Service logic:
    ```bash
    git clone https://github.com/Othentic-Labs/simple-price-oracle-avs-example.git
    cd simple-price-oracle-avs-example
+   git checkout kyc-avs
    ```
 
 2. Install Othentic CLI:
@@ -104,9 +105,22 @@ Validation Service logic:
    npm i -g @othentic/node
    ```
 
-## Usage
+3. Set up the TEE server by following the instructions below. Build the Docker image and start the server. Make sure to populate the `.env` file with `TEE_KYC_SERVER_URL` and any other required environment variables.
+   ```bash
+   cd ..
+   git clone https://github.com/scrtlabs/kyc-avs-demo
+   cd kyc-avs-demo
+   docker build -t kyc-avs .
+   ```
 
-Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/welcome/getting-started/install-othentic-cli) Guide for setup and deployment.
+4. Follow the steps in the official documentation's [Quickstart](https://docs.othentic.xyz/main/welcome/getting-started/install-othentic-cli) Guide for setup and deployment.
+
+   ```
+   cd simple-price-oracle-avs-example
+   docker compose build --no-cache
+   docker compose up
+   curl -X POST http://localhost:4003/task/execute
+   ```
 
 ### Next
 Modify the different configurations, tailor the task execution logic as per your use case, and run the AVS.

@@ -96,6 +96,7 @@ services:
     environment:
       - OTHENTIC_CLIENT_RPC_ADDRESS=http://10.8.0.69:8545
       - PRIVATE_KEY=${PRIVATE_KEY_PERFORMER}
+      - TEE_KYC_SERVER_URL=http://10.8.0.200:8000/api/kyc
     env_file:
       - .env
     ports:
@@ -103,6 +104,16 @@ services:
     networks:
       p2p:
         ipv4_address: 10.8.0.101
+  kyc-avs:
+    image: kyc-avs  # This should match the name of your locally built image
+    container_name: kyc-avs
+    environment:
+      - SECRET_AI_API_KEY=${SECRET_AI_API_KEY}
+    ports:
+      - "8000:8000"
+    networks:
+      p2p:
+        ipv4_address: 10.8.0.200
 
 networks:
   p2p:
